@@ -12,7 +12,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class PostgresTestExtension extends DatabaseTestExtension implements BeforeEachCallback, AfterEachCallback {
+public class PostgresFastTestExtension extends DatabaseTestExtension implements BeforeEachCallback, AfterEachCallback {
     private static final PostgreSQLContainer<?> DB_CONTAINER =
             new PostgreSQLContainer<>("postgres:14.4-alpine").withReuse(true);
 

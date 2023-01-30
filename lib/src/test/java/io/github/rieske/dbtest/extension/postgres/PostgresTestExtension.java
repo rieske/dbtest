@@ -1,5 +1,6 @@
-package io.github.rieske.dbtest.extension;
+package io.github.rieske.dbtest.extension.postgres;
 
+import io.github.rieske.dbtest.extension.DatabaseTestExtension;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -14,7 +15,7 @@ import java.util.UUID;
 public abstract class PostgresTestExtension extends DatabaseTestExtension implements BeforeEachCallback, AfterEachCallback {
     protected static final PostgreSQLContainer<?> DB_CONTAINER =
             new PostgreSQLContainer<>("postgres:14.4-alpine").withReuse(true);
-    protected static final String JDBC_URI;
+    private static final String JDBC_URI;
 
     static {
         DB_CONTAINER.start();

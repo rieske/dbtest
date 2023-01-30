@@ -1,7 +1,7 @@
 package io.github.rieske.dbtest;
 
 import io.github.rieske.dbtest.extension.DatabaseTestExtension;
-import io.github.rieske.dbtest.extension.PostgresFastTestExtension;
+import io.github.rieske.dbtest.extension.postgres.PostgresFastTestExtension;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 class FastDatabaseTest extends DatabaseTest {

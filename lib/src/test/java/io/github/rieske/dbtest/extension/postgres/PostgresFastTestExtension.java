@@ -1,4 +1,4 @@
-package io.github.rieske.dbtest.extension;
+package io.github.rieske.dbtest.extension.postgres;
 
 import org.flywaydb.core.Flyway;
 

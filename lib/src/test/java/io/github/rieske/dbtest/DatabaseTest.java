@@ -8,10 +8,11 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 abstract class DatabaseTest {
+    private static final int REPETITIONS = 100;
 
     abstract DatabaseTestExtension database();
 
-    @RepeatedTest(100)
+    @RepeatedTest(REPETITIONS)
     void interactWithDatabase() {
         var id = UUID.randomUUID();
         var foo = UUID.randomUUID().toString();
@@ -30,7 +31,7 @@ abstract class DatabaseTest {
         });
     }
 
-    @RepeatedTest(100)
+    @RepeatedTest(REPETITIONS)
     void doNothing() {
     }
 }

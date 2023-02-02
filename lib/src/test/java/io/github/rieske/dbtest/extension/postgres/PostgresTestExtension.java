@@ -10,6 +10,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.UUID;
 
 public abstract class PostgresTestExtension extends DatabaseTestExtension implements BeforeEachCallback, AfterEachCallback {
@@ -18,6 +19,7 @@ public abstract class PostgresTestExtension extends DatabaseTestExtension implem
     private static final String JDBC_URI;
 
     static {
+        DB_CONTAINER.withTmpFs(Map.of("/var/lib/postgresql/data", "rw"));
         DB_CONTAINER.start();
         JDBC_URI = "jdbc:postgresql://" + DB_CONTAINER.getHost() + ":" + DB_CONTAINER.getMappedPort(5432);
     }

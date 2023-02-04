@@ -9,18 +9,28 @@ dependencies {
 
     implementation("org.postgresql:postgresql:42.5.3")
     implementation("mysql:mysql-connector-java:8.0.32")
-
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
-    testImplementation("org.assertj:assertj-core:3.24.2")
-    testImplementation("org.apache.logging.log4j:log4j-slf4j-impl:2.19.0")
-
-    def testContainersVersion = "1.17.6"
-    testImplementation("org.testcontainers:postgresql:$testContainersVersion")
-    testImplementation("org.testcontainers:mysql:$testContainersVersion")
 }
 
-tasks.named("test") {
-    useJUnitPlatform()
-    systemProperties["junit.jupiter.execution.parallel.enabled"] = true
-    //systemProperties["junit.jupiter.execution.parallel.mode.default"] = "concurrent"
+testing {
+    suites {
+        test {
+            useJUnitJupiter("5.9.2")
+            dependencies {
+                implementation("org.assertj:assertj-core:3.24.2")
+                implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.19.0")
+
+                implementation(project.dependencies.platform("org.testcontainers:testcontainers-bom:1.17.6"))
+                implementation("org.testcontainers:postgresql")
+                implementation("org.testcontainers:mysql")
+            }
+            targets {
+                all {
+                    testTask.configure {
+                        systemProperties["junit.jupiter.execution.parallel.enabled"] = true
+                        systemProperties["junit.jupiter.execution.parallel.mode.default"] = "concurrent"
+                    }
+                }
+            }
+        }
+    }
 }

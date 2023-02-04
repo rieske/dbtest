@@ -2,7 +2,7 @@ package io.github.rieske.dbtest.extension.postgres;
 
 import org.flywaydb.core.Flyway;
 
-public class PostgresFastTestExtension extends PostgresTestExtension  {
+public class PostgresFastTestExtension extends PostgresTestExtension {
 
     static {
         Flyway.configure()

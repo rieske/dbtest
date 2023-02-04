@@ -1,5 +1,5 @@
 CREATE TABLE some_table(
-    id UUID NOT NULL PRIMARY KEY,
+    id VARCHAR(36) NOT NULL PRIMARY KEY,
     foo TEXT NOT NULL,
     bar TEXT NOT NULL
 );

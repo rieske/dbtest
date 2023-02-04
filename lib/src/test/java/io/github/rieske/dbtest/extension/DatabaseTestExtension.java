@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public abstract class DatabaseTestExtension implements Extension {
+
     public abstract DataSource getDataSource();
 
     public void executeUpdateSql(String sql) {

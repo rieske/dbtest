@@ -7,7 +7,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-abstract class DatabaseTest {
+public abstract class DatabaseTest {
     private static final int REPETITIONS = 100;
 
     abstract DatabaseTestExtension database();
@@ -25,7 +25,7 @@ abstract class DatabaseTest {
         });
         database().executeQuerySql("SELECT * FROM some_table", rs -> {
             assertThat(rs.next()).isTrue();
-            assertThat(rs.getObject(1, UUID.class)).isEqualTo(id);
+            assertThat(UUID.fromString(rs.getString(1))).isEqualTo(id);
             assertThat(rs.getString(2)).isEqualTo(foo);
             return null;
         });

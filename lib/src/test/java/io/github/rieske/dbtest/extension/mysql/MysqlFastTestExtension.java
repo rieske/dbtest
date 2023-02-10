@@ -1,5 +1,6 @@
 package io.github.rieske.dbtest.extension.mysql;
 
+import io.github.rieske.dbtest.mysql.MysqlTestExtension;
 import org.flywaydb.core.Flyway;
 import org.testcontainers.containers.Container;
 
@@ -42,7 +43,7 @@ public class MysqlFastTestExtension extends MysqlTestExtension {
     }
 
     @Override
-    void createFreshMigratedDatabase() {
+    protected void createFreshMigratedDatabase() {
         executeInDefaultDatabase("CREATE DATABASE " + databaseName);
         restoreDatabase();
     }

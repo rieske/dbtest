@@ -1,6 +1,5 @@
 package io.github.rieske.dbtest;
 
-import io.github.rieske.dbtest.extension.DatabaseTestExtension;
 import io.github.rieske.dbtest.extension.mysql.MysqlFastTestExtension;
 import io.github.rieske.dbtest.extension.mysql.MysqlSlowTestExtension;
 import org.junit.jupiter.api.Nested;

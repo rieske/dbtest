@@ -1,7 +1,7 @@
-package io.github.rieske.dbtest.extension.mysql;
+package io.github.rieske.dbtest.mysql;
 
 import com.mysql.cj.jdbc.MysqlDataSource;
-import io.github.rieske.dbtest.extension.DatabaseTestExtension;
+import io.github.rieske.dbtest.DatabaseTestExtension;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -26,8 +26,6 @@ public abstract class MysqlTestExtension extends DatabaseTestExtension implement
     }
 
     protected final String databaseName = "testdb_" + UUID.randomUUID().toString().replace('-', '_');
-
-    abstract void createFreshMigratedDatabase();
 
     @Override
     public void beforeEach(ExtensionContext context) {

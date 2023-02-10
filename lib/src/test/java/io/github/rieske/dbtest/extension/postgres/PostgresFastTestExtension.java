@@ -1,5 +1,6 @@
 package io.github.rieske.dbtest.extension.postgres;
 
+import io.github.rieske.dbtest.postgres.PostgresTestExtension;
 import org.flywaydb.core.Flyway;
 
 public class PostgresFastTestExtension extends PostgresTestExtension {
@@ -12,7 +13,7 @@ public class PostgresFastTestExtension extends PostgresTestExtension {
     }
 
     @Override
-    void createFreshMigratedDatabase() {
+    protected void createFreshMigratedDatabase() {
         executeInPostgresSchema("CREATE DATABASE " + databaseName + " TEMPLATE " + DB_CONTAINER.getDatabaseName());
     }
 }

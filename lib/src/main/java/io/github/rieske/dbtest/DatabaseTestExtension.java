@@ -1,4 +1,4 @@
-package io.github.rieske.dbtest.extension;
+package io.github.rieske.dbtest;
 
 import org.junit.jupiter.api.extension.Extension;
 
@@ -28,6 +28,8 @@ public abstract class DatabaseTestExtension implements Extension {
             throw new RuntimeException(e);
         }
     }
+
+    protected abstract void createFreshMigratedDatabase();
 
     @FunctionalInterface
     public interface ResultSetMapper<T> {

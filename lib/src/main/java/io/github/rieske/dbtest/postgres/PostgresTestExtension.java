@@ -1,6 +1,6 @@
-package io.github.rieske.dbtest.extension.postgres;
+package io.github.rieske.dbtest.postgres;
 
-import io.github.rieske.dbtest.extension.DatabaseTestExtension;
+import io.github.rieske.dbtest.DatabaseTestExtension;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -25,8 +25,6 @@ public abstract class PostgresTestExtension extends DatabaseTestExtension implem
     }
 
     protected final String databaseName = "testdb_" + UUID.randomUUID().toString().replace('-', '_');
-
-    abstract void createFreshMigratedDatabase();
 
     @Override
     public void beforeEach(ExtensionContext context) {

@@ -1,6 +1,5 @@
 package io.github.rieske.dbtest;
 
-import io.github.rieske.dbtest.extension.DatabaseTestExtension;
 import org.junit.jupiter.api.RepeatedTest;
 
 import java.util.UUID;

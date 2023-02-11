@@ -2,27 +2,14 @@ package io.github.rieske.dbtest.extension.mysql;
 
 public abstract class MysqlFastTestExtension extends MysqlTestExtension {
 
-    private static final String DB_DUMP_FILENAME = "db_dump.sql";
-
-    private static volatile boolean templateDatabaseMigrated = false;
-
-    public MysqlFastTestExtension() {
-        if (templateDatabaseMigrated) {
-            return;
-        }
-        synchronized (database) {
-            if (templateDatabaseMigrated) {
-                return;
-            }
-            migrateDatabase(database.dataSourceForDatabase(database.getTemplateDatabaseName()));
-            database.dumpDatabase(DB_DUMP_FILENAME);
-            templateDatabaseMigrated = true;
-        }
+    public MysqlFastTestExtension(String databaseVersion) {
+        super(databaseVersion);
+        database.migrateTemplate(this::migrateDatabase);
     }
 
     @Override
     protected void createFreshMigratedDatabase() {
         database.executePrivileged("CREATE DATABASE " + databaseName);
-        database.restoreDatabase(databaseName, DB_DUMP_FILENAME);
+        database.restoreDatabase(databaseName);
     }
 }

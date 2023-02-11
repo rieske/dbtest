@@ -5,8 +5,10 @@ import org.junit.jupiter.api.extension.Extension;
 import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.UUID;
 
 public abstract class DatabaseTestExtension implements Extension {
+    protected final String databaseName = "testdb_" + UUID.randomUUID().toString().replace('-', '_');
 
     public abstract DataSource getDataSource();
 

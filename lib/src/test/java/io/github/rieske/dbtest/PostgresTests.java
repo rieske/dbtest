@@ -1,7 +1,7 @@
 package io.github.rieske.dbtest;
 
-import io.github.rieske.dbtest.extension.postgres.PostgresFastTestExtension;
-import io.github.rieske.dbtest.extension.postgres.PostgresSlowTestExtension;
+import io.github.rieske.dbtest.extension.postgres.FlywayPostgresFastTestExtension;
+import io.github.rieske.dbtest.extension.postgres.FlywayPostgresSlowTestExtension;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -9,7 +9,7 @@ public class PostgresTests {
     @Nested
     class SlowTests extends DatabaseTest {
         @RegisterExtension
-        private final DatabaseTestExtension database = new PostgresSlowTestExtension();
+        private final DatabaseTestExtension database = new FlywayPostgresSlowTestExtension();
 
         @Override
         DatabaseTestExtension database() {
@@ -20,7 +20,7 @@ public class PostgresTests {
     @Nested
     class FastTests extends DatabaseTest {
         @RegisterExtension
-        private final DatabaseTestExtension database = new PostgresFastTestExtension();
+        private final DatabaseTestExtension database = new FlywayPostgresFastTestExtension();
 
         @Override
         DatabaseTestExtension database() {

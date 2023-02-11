@@ -1,15 +1,12 @@
 package io.github.rieske.dbtest.extension.postgres;
 
-import io.github.rieske.dbtest.postgres.PostgresTestExtension;
-import org.flywaydb.core.Flyway;
-
-public class PostgresSlowTestExtension extends PostgresTestExtension {
+/**
+ * Simulates the traditional approach of creating a fresh database and applying migrations for each test.
+ */
+abstract class PostgresSlowTestExtension extends PostgresTestExtension {
     @Override
     protected void createFreshMigratedDatabase() {
-        executeInPostgresSchema("CREATE DATABASE " + databaseName);
-        Flyway.configure()
-                .dataSource(dataSourceForDatabase(databaseName))
-                .load()
-                .migrate();
+        database.executeInPostgresSchema("CREATE DATABASE " + databaseName);
+        migrateDatabase(database.dataSourceForDatabase(databaseName));
     }
 }

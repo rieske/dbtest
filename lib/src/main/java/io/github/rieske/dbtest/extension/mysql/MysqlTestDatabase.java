@@ -11,7 +11,7 @@ import java.sql.SQLException;
 import java.util.Map;
 
 class MysqlTestDatabase {
-    protected static final MySQLContainer<?> DB_CONTAINER =
+    private static final MySQLContainer<?> DB_CONTAINER =
             new MySQLContainer<>("mysql:8.0.32").withReuse(true);
     private static final String JDBC_URI;
 
@@ -19,7 +19,7 @@ class MysqlTestDatabase {
         DB_CONTAINER.withTmpFs(Map.of("/var/lib/mysql", "rw"));
         DB_CONTAINER.withCommand("mysqld", "--innodb_flush_method=nosync");
         DB_CONTAINER.start();
-        JDBC_URI = "jdbc:mysql://" + DB_CONTAINER.getHost() + ":" + DB_CONTAINER.getMappedPort(3306);
+        JDBC_URI = "jdbc:mysql://%s:%s/".formatted(DB_CONTAINER.getHost(), DB_CONTAINER.getMappedPort(3306));
     }
 
     String getMasterDatabaseName() {
@@ -28,7 +28,7 @@ class MysqlTestDatabase {
 
     DataSource dataSourceForDatabase(String databaseName) {
         var dataSource = new MysqlDataSource();
-        dataSource.setUrl(JDBC_URI + "/" + databaseName);
+        dataSource.setUrl(JDBC_URI + databaseName);
         dataSource.setUser("root");
         dataSource.setPassword(DB_CONTAINER.getPassword());
         return dataSource;
@@ -44,7 +44,7 @@ class MysqlTestDatabase {
     }
 
     void dumpDatabase(String dbDumpFilename) {
-        String command = "mysqldump -u root --password=%s %s > %s".formatted(DB_CONTAINER.getPassword(), DB_CONTAINER.getDatabaseName(), dbDumpFilename);
+        String command = "mysqldump -u root --password=%s %s > %s".formatted(DB_CONTAINER.getPassword(), getMasterDatabaseName(), dbDumpFilename);
         Container.ExecResult result = runInDatabaseContainer(command);
         if (result.getExitCode() != 0) {
             throw new RuntimeException("Error dumping database: " + result);

@@ -1,6 +1,7 @@
 plugins {
     id("io.github.rieske.dbtest.java-library")
     id("maven-publish")
+    id("signing")
 }
 
 java {
@@ -11,6 +12,43 @@ publishing {
     publications {
         maven(MavenPublication) {
             from(components.java)
+            pom {
+                name = "io.github.rieske.dbtest"
+                description = "Fast tests against containerized databases"
+                url = "https://github.com/rieske/dbtest"
+                licenses {
+                    license {
+                        name = "The Apache License, Version 2.0"
+                        url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "rieske"
+                        name = "Vaidotas Valuckas"
+                        email = "vaidotas.valuckas@gmail.com"
+                    }
+                }
+                scm {
+                    connection = "scm:git:git@github.com:rieske/dbtest.git"
+                    developerConnection = "scm:git:git@github.com:rieske/dbtest.git"
+                    url = "https://github.com/rieske/dbtest"
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
+            credentials(PasswordCredentials)
         }
     }
 }
+
+signing {
+    def signingKey = findProperty("signingKey")
+    def signingPassword = findProperty("signingPassword")
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign(publishing.publications.maven)
+}
+

@@ -4,7 +4,7 @@ import org.flywaydb.core.Flyway;
 
 import javax.sql.DataSource;
 
-public class FlywayMysqlSlowTestExtension extends MysqlSlowTestExtension{
+public class FlywayMysqlSlowTestExtension extends MysqlSlowTestExtension {
 
     public FlywayMysqlSlowTestExtension(String databaseVersion) {
         super(databaseVersion);

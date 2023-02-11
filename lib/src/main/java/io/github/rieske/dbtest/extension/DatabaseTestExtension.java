@@ -1,4 +1,4 @@
-package io.github.rieske.dbtest;
+package io.github.rieske.dbtest.extension;
 
 import org.junit.jupiter.api.extension.Extension;
 

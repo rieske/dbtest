@@ -2,23 +2,13 @@ package io.github.rieske.dbtest.extension.postgres;
 
 public abstract class PostgresFastTestExtension extends PostgresTestExtension {
 
-    private static volatile boolean templateDatabaseMigrated = false;
-
-    public PostgresFastTestExtension() {
-        if (templateDatabaseMigrated) {
-            return;
-        }
-        synchronized (database) {
-            if (templateDatabaseMigrated) {
-                return;
-            }
-            migrateDatabase(database.dataSourceForDatabase(database.getTemplateDatabaseName()));
-            templateDatabaseMigrated = true;
-        }
+    public PostgresFastTestExtension(String databaseVersion) {
+        super(databaseVersion);
+        database.migrateTemplate(this::migrateDatabase);
     }
 
     @Override
     protected void createFreshMigratedDatabase() {
-        database.executeInPostgresSchema("CREATE DATABASE " + databaseName + " TEMPLATE " + database.getTemplateDatabaseName());
+        database.executePrivileged("CREATE DATABASE " + databaseName + " TEMPLATE " + database.getTemplateDatabaseName());
     }
 }

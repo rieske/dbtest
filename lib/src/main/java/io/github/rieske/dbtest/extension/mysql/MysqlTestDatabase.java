@@ -34,7 +34,7 @@ class MysqlTestDatabase {
         return dataSource;
     }
 
-    void executeInDefaultDatabase(String sql) {
+    void executePrivileged(String sql) {
         var dataSource = dataSourceForDatabase(DB_CONTAINER.getDatabaseName());
         try (Connection conn = dataSource.getConnection()) {
             conn.createStatement().execute(sql);

@@ -9,7 +9,11 @@ import javax.sql.DataSource;
 
 public abstract class PostgresTestExtension extends DatabaseTestExtension implements BeforeEachCallback, AfterEachCallback {
 
-    protected static final PostgresTestDatabase database = new PostgresTestDatabase();
+    protected final PostgresTestDatabase database;
+
+    PostgresTestExtension(String databaseVersion) {
+        this.database = PostgresTestDatabaseManager.getDatabase(databaseVersion);
+    }
 
     abstract protected void migrateDatabase(DataSource dataSource);
 
@@ -20,7 +24,7 @@ public abstract class PostgresTestExtension extends DatabaseTestExtension implem
 
     @Override
     public void afterEach(ExtensionContext context) {
-        database.executeInPostgresSchema("DROP DATABASE " + databaseName);
+        database.executePrivileged("DROP DATABASE " + databaseName);
     }
 
     @Override

@@ -22,7 +22,7 @@ public abstract class MysqlFastTestExtension extends MysqlTestExtension {
 
     @Override
     protected void createFreshMigratedDatabase() {
-        database.executeInDefaultDatabase("CREATE DATABASE " + databaseName);
+        database.executePrivileged("CREATE DATABASE " + databaseName);
         database.restoreDatabase(databaseName, DB_DUMP_FILENAME);
     }
 }

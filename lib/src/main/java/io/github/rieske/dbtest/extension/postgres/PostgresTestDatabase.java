@@ -7,31 +7,47 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.function.Consumer;
 
 class PostgresTestDatabase {
-    private static final PostgreSQLContainer<?> DB_CONTAINER =
-            new PostgreSQLContainer<>("postgres:14.4-alpine").withReuse(true);
-    private static final String JDBC_URI;
+    private final PostgreSQLContainer<?> container;
+    private final String jdbcPrefix;
 
-    static {
-        DB_CONTAINER.withTmpFs(Map.of("/var/lib/postgresql/data", "rw"));
-        DB_CONTAINER.start();
-        JDBC_URI = "jdbc:postgresql://%s:%s/".formatted(DB_CONTAINER.getHost(), DB_CONTAINER.getMappedPort(5432));
+    private volatile boolean templateDatabaseMigrated = false;
+
+    PostgresTestDatabase(String version) {
+        this.container = new PostgreSQLContainer<>("postgres:" + version).withReuse(true);
+        container.withTmpFs(Map.of("/var/lib/postgresql/data", "rw"));
+        container.start();
+        this.jdbcPrefix = "jdbc:postgresql://%s:%s/".formatted(container.getHost(), container.getMappedPort(5432));
+    }
+
+    void migrateTemplate(Consumer<DataSource> migrator) {
+        if (templateDatabaseMigrated) {
+            return;
+        }
+        synchronized (this) {
+            if (templateDatabaseMigrated) {
+                return;
+            }
+            migrator.accept(dataSourceForDatabase(getTemplateDatabaseName()));
+            templateDatabaseMigrated = true;
+        }
     }
 
     String getTemplateDatabaseName() {
-        return DB_CONTAINER.getDatabaseName();
+        return container.getDatabaseName();
     }
 
     DataSource dataSourceForDatabase(String databaseName) {
         PGSimpleDataSource dataSource = new PGSimpleDataSource();
-        dataSource.setUrl(JDBC_URI + databaseName);
-        dataSource.setUser(DB_CONTAINER.getUsername());
-        dataSource.setPassword(DB_CONTAINER.getPassword());
+        dataSource.setUrl(jdbcPrefix + databaseName);
+        dataSource.setUser(container.getUsername());
+        dataSource.setPassword(container.getPassword());
         return dataSource;
     }
 
-    void executeInPostgresSchema(String sql) {
+    void executePrivileged(String sql) {
         DataSource dataSource = dataSourceForDatabase("postgres");
         try (Connection conn = dataSource.getConnection()) {
             conn.createStatement().execute(sql);

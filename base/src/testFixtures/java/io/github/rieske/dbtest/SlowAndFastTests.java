@@ -5,12 +5,12 @@ import org.junit.jupiter.api.Nested;
 
 import java.util.function.Function;
 
-abstract class SlowAndFastTests {
+public abstract class SlowAndFastTests {
     private final String databaseVersion;
     private final Function<String, DatabaseTestExtension> slowExtensionProvider;
     private final Function<String, DatabaseTestExtension> fastExtensionProvider;
 
-    SlowAndFastTests(
+    public SlowAndFastTests(
             String databaseVersion,
             Function<String, DatabaseTestExtension> slowExtensionProvider,
             Function<String, DatabaseTestExtension> fastExtensionProvider

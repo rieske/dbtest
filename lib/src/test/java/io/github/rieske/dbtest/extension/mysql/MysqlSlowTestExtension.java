@@ -5,9 +5,9 @@ import org.flywaydb.core.Flyway;
 public class MysqlSlowTestExtension extends MysqlTestExtension {
     @Override
     protected void createFreshMigratedDatabase() {
-        executeInDefaultDatabase("CREATE DATABASE " + databaseName);
+        database.executeInDefaultDatabase("CREATE DATABASE " + databaseName);
         Flyway.configure()
-                .dataSource(dataSourceForDatabase(databaseName))
+                .dataSource(database.dataSourceForDatabase(databaseName))
                 .load()
                 .migrate();
     }

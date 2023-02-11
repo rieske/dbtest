@@ -11,7 +11,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.UUID;
 
 public abstract class MysqlTestExtension extends DatabaseTestExtension implements BeforeEachCallback, AfterEachCallback {
     protected static final MySQLContainer<?> DB_CONTAINER =
@@ -24,8 +23,6 @@ public abstract class MysqlTestExtension extends DatabaseTestExtension implement
         DB_CONTAINER.start();
         JDBC_URI = "jdbc:mysql://" + DB_CONTAINER.getHost() + ":" + DB_CONTAINER.getMappedPort(3306);
     }
-
-    protected final String databaseName = "testdb_" + UUID.randomUUID().toString().replace('-', '_');
 
     @Override
     public void beforeEach(ExtensionContext context) {

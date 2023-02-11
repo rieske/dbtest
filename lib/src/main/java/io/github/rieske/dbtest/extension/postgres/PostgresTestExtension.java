@@ -6,13 +6,10 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import javax.sql.DataSource;
-import java.util.UUID;
 
 public abstract class PostgresTestExtension extends DatabaseTestExtension implements BeforeEachCallback, AfterEachCallback {
 
     protected static final PostgresTestDatabase database = new PostgresTestDatabase();
-
-    protected final String databaseName = "testdb_" + UUID.randomUUID().toString().replace('-', '_');
 
     abstract protected void migrateDatabase(DataSource dataSource);
 

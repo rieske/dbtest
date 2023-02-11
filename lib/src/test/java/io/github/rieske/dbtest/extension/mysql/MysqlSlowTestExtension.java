@@ -10,7 +10,7 @@ abstract class MysqlSlowTestExtension extends MysqlTestExtension {
 
     @Override
     protected void createFreshMigratedDatabase() {
-        database.executePrivileged("CREATE DATABASE " + databaseName);
-        migrateDatabase(database.dataSourceForDatabase(databaseName));
+        database.createDatabase(databaseName);
+        migrateDatabase(getDataSource());
     }
 }

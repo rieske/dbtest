@@ -1,20 +1,18 @@
 package io.github.rieske.dbtest.extension.postgres;
 
+import io.github.rieske.dbtest.extension.TestDatabase;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.function.Consumer;
 
-class PostgresTestDatabase {
+class PostgresTestDatabase extends TestDatabase {
     private final PostgreSQLContainer<?> container;
     private final String jdbcPrefix;
 
-    private volatile boolean templateDatabaseMigrated = false;
-
+    @SuppressWarnings("resource")
     PostgresTestDatabase(String version) {
         this.container = new PostgreSQLContainer<>("postgres:" + version).withReuse(true);
         this.container.withTmpFs(Map.of("/var/lib/postgresql/data", "rw"));
@@ -22,24 +20,18 @@ class PostgresTestDatabase {
         this.jdbcPrefix = "jdbc:postgresql://%s:%s/".formatted(container.getHost(), container.getMappedPort(5432));
     }
 
-    void migrateTemplate(Consumer<DataSource> migrator) {
-        if (templateDatabaseMigrated) {
-            return;
-        }
-        synchronized (this) {
-            if (templateDatabaseMigrated) {
-                return;
-            }
-            migrator.accept(dataSourceForDatabase(getTemplateDatabaseName()));
-            templateDatabaseMigrated = true;
-        }
+    @Override
+    protected void cloneTemplateDatabaseTo(String targetDatabaseName) {
+        executePrivileged("CREATE DATABASE " + targetDatabaseName + " TEMPLATE " + getTemplateDatabaseName());
     }
 
-    String getTemplateDatabaseName() {
-        return container.getDatabaseName();
+    @Override
+    protected void migrateTemplateDatabase(Consumer<DataSource> migrator, DataSource templateDataSource) {
+        migrator.accept(dataSourceForDatabase(getTemplateDatabaseName()));
     }
 
-    DataSource dataSourceForDatabase(String databaseName) {
+    @Override
+    protected DataSource dataSourceForDatabase(String databaseName) {
         PGSimpleDataSource dataSource = new PGSimpleDataSource();
         dataSource.setUrl(jdbcPrefix + databaseName);
         dataSource.setUser(container.getUsername());
@@ -47,12 +39,13 @@ class PostgresTestDatabase {
         return dataSource;
     }
 
-    void executePrivileged(String sql) {
-        DataSource dataSource = dataSourceForDatabase("postgres");
-        try (Connection conn = dataSource.getConnection()) {
-            conn.createStatement().execute(sql);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+    @Override
+    protected String getTemplateDatabaseName() {
+        return container.getDatabaseName();
+    }
+
+    @Override
+    protected DataSource getPrivilegedDataSource() {
+        return dataSourceForDatabase("postgres");
     }
 }

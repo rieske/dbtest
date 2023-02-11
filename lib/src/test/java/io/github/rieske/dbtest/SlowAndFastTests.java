@@ -1,5 +1,6 @@
 package io.github.rieske.dbtest;
 
+import io.github.rieske.dbtest.extension.DatabaseTestExtension;
 import org.junit.jupiter.api.Nested;
 
 import java.util.function.Function;

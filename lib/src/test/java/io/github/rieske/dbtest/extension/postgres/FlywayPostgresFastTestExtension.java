@@ -4,7 +4,7 @@ import org.flywaydb.core.Flyway;
 
 import javax.sql.DataSource;
 
-public class FlywayPostgresFastTestExtension extends PostgresFastTestExtension{
+public class FlywayPostgresFastTestExtension extends PostgresFastTestExtension {
     public FlywayPostgresFastTestExtension(String databaseVersion) {
         super(databaseVersion);
     }

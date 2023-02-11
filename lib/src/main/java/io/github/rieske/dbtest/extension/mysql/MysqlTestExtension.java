@@ -1,6 +1,6 @@
 package io.github.rieske.dbtest.extension.mysql;
 
-import io.github.rieske.dbtest.DatabaseTestExtension;
+import io.github.rieske.dbtest.extension.DatabaseTestExtension;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -23,7 +23,7 @@ public abstract class MysqlTestExtension extends DatabaseTestExtension implement
 
     @Override
     public void afterEach(ExtensionContext context) {
-        database.executePrivileged("DROP DATABASE " + databaseName);
+        database.dropDatabase(databaseName);
     }
 
     @Override

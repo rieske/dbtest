@@ -1,24 +1,22 @@
 package io.github.rieske.dbtest.extension.mysql;
 
 import com.mysql.cj.jdbc.MysqlDataSource;
+import io.github.rieske.dbtest.extension.TestDatabase;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.MySQLContainer;
 
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.function.Consumer;
 
-class MysqlTestDatabase {
+class MysqlTestDatabase extends TestDatabase {
+    private static final String DB_DUMP_FILENAME = "db_dump.sql";
+
     private final MySQLContainer<?> container;
     private final String jdbcPrefix;
 
-    private volatile boolean templateDatabaseMigrated = false;
-
-    private static final String DB_DUMP_FILENAME = "db_dump.sql";
-
+    @SuppressWarnings("resource")
     MysqlTestDatabase(String version) {
         this.container = new MySQLContainer<>("mysql:" + version).withReuse(true);
         this.container.withTmpFs(Map.of("/var/lib/mysql", "rw"));
@@ -27,42 +25,38 @@ class MysqlTestDatabase {
         this.jdbcPrefix = "jdbc:mysql://%s:%s/".formatted(container.getHost(), container.getMappedPort(3306));
     }
 
-    void migrateTemplate(Consumer<DataSource> migrator) {
-        if (templateDatabaseMigrated) {
-            return;
-        }
-        synchronized (this) {
-            if (templateDatabaseMigrated) {
-                return;
-            }
-            migrator.accept(dataSourceForDatabase(getTemplateDatabaseName()));
-            this.dumpDatabase();
-            templateDatabaseMigrated = true;
-        }
+    @Override
+    protected void cloneTemplateDatabaseTo(String targetDatabaseName) {
+        createDatabase(targetDatabaseName);
+        restoreDatabase(targetDatabaseName);
     }
 
-    String getTemplateDatabaseName() {
-        return container.getDatabaseName();
+    @Override
+    protected void migrateTemplateDatabase(Consumer<DataSource> migrator, DataSource templateDataSource) {
+        migrator.accept(templateDataSource);
+        dumpDatabase();
     }
 
-    DataSource dataSourceForDatabase(String databaseName) {
-        var dataSource = new MysqlDataSource();
+    @Override
+    protected DataSource dataSourceForDatabase(String databaseName) {
+        MysqlDataSource dataSource = new MysqlDataSource();
         dataSource.setUrl(jdbcPrefix + databaseName);
         dataSource.setUser("root");
         dataSource.setPassword(container.getPassword());
         return dataSource;
     }
 
-    void executePrivileged(String sql) {
-        var dataSource = dataSourceForDatabase(container.getDatabaseName());
-        try (Connection conn = dataSource.getConnection()) {
-            conn.createStatement().execute(sql);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+    @Override
+    protected String getTemplateDatabaseName() {
+        return container.getDatabaseName();
     }
 
-    void dumpDatabase() {
+    @Override
+    protected DataSource getPrivilegedDataSource() {
+        return dataSourceForDatabase(container.getDatabaseName());
+    }
+
+    private void dumpDatabase() {
         String command = "mysqldump -u root --password=%s %s > %s".formatted(container.getPassword(), getTemplateDatabaseName(), DB_DUMP_FILENAME);
         Container.ExecResult result = runInDatabaseContainer(command);
         if (result.getExitCode() != 0) {
@@ -70,7 +64,7 @@ class MysqlTestDatabase {
         }
     }
 
-    void restoreDatabase(String databaseName) {
+    private void restoreDatabase(String databaseName) {
         String command = "mysql -u root --password=%s %s < %s".formatted(container.getPassword(), databaseName, DB_DUMP_FILENAME);
         Container.ExecResult result = runInDatabaseContainer(command);
         if (result.getExitCode() != 0) {

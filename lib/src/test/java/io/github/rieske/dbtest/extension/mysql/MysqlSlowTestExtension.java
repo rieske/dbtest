@@ -1,14 +1,12 @@
 package io.github.rieske.dbtest.extension.mysql;
 
-import org.flywaydb.core.Flyway;
-
-public class MysqlSlowTestExtension extends MysqlTestExtension {
+/**
+ * Simulates the traditional approach of creating a fresh database and applying migrations for each test.
+ */
+abstract class MysqlSlowTestExtension extends MysqlTestExtension {
     @Override
     protected void createFreshMigratedDatabase() {
         database.executeInDefaultDatabase("CREATE DATABASE " + databaseName);
-        Flyway.configure()
-                .dataSource(database.dataSourceForDatabase(databaseName))
-                .load()
-                .migrate();
+        migrateDatabase(database.dataSourceForDatabase(databaseName));
     }
 }

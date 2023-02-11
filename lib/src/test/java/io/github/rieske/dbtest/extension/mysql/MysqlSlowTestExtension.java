@@ -6,7 +6,7 @@ package io.github.rieske.dbtest.extension.mysql;
 abstract class MysqlSlowTestExtension extends MysqlTestExtension {
     @Override
     protected void createFreshMigratedDatabase() {
-        database.executeInDefaultDatabase("CREATE DATABASE " + databaseName);
+        database.executePrivileged("CREATE DATABASE " + databaseName);
         migrateDatabase(database.dataSourceForDatabase(databaseName));
     }
 }

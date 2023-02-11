@@ -19,7 +19,7 @@ public abstract class MysqlTestExtension extends DatabaseTestExtension implement
 
     @Override
     public void afterEach(ExtensionContext context) {
-        database.executeInDefaultDatabase("DROP DATABASE " + databaseName);
+        database.executePrivileged("DROP DATABASE " + databaseName);
     }
 
     @Override

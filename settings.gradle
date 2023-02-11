@@ -5,4 +5,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "java-fast-database-tests"
-include(":lib")
+include(":base")
+include(":mysql")
+include(":postgres")

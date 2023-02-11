@@ -1,5 +1,5 @@
 plugins {
-    id("java-library")
+    id("io.github.rieske.dbtest.published-library")
     id("java-test-fixtures")
 }
 
@@ -8,3 +8,6 @@ dependencies {
 
     testFixturesApi("org.assertj:assertj-core:3.24.2")
 }
+
+components.java.withVariantsFromConfiguration(configurations.testFixturesApiElements) { skip() }
+components.java.withVariantsFromConfiguration(configurations.testFixturesRuntimeElements) { skip() }

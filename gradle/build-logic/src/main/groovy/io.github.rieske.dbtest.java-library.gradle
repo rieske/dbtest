@@ -1,0 +1,19 @@
+plugins {
+    id("java-library")
+}
+
+testing {
+    suites {
+        test {
+            useJUnitJupiter()
+            targets {
+                all {
+                    testTask.configure {
+                        systemProperties["junit.jupiter.execution.parallel.enabled"] = true
+                        systemProperties["junit.jupiter.execution.parallel.mode.default"] = "concurrent"
+                    }
+                }
+            }
+        }
+    }
+}

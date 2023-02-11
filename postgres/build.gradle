@@ -1,34 +1,21 @@
 plugins {
-    id("java-library")
+    id("io.github.rieske.dbtest.published-library")
 }
 
 dependencies {
     api(project(":base"))
 
     implementation("org.postgresql:postgresql:42.5.3")
-
-    implementation(platform("org.testcontainers:testcontainers-bom:1.17.6"))
-    implementation("org.testcontainers:postgresql")
+    implementation("org.testcontainers:postgresql:1.17.6")
 }
 
 testing {
     suites {
         test {
-            useJUnitJupiter()
             dependencies {
                 implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.19.0")
-
-                def flywayVersion = "9.14.1"
-                implementation("org.flywaydb:flyway-core:$flywayVersion")
+                implementation("org.flywaydb:flyway-core:9.14.1")
                 implementation(project.dependencies.testFixtures(project(":base")))
-            }
-            targets {
-                all {
-                    testTask.configure {
-                        systemProperties["junit.jupiter.execution.parallel.enabled"] = true
-                        systemProperties["junit.jupiter.execution.parallel.mode.default"] = "concurrent"
-                    }
-                }
             }
         }
     }

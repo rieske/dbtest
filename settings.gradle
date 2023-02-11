@@ -7,7 +7,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "java-fast-database-tests"
+rootProject.name = "dbtest"
 include(":base")
 include(":mysql")
 include(":postgres")

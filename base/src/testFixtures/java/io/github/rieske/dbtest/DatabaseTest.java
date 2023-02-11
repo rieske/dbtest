@@ -20,9 +20,9 @@ abstract class DatabaseTest {
 
     @RepeatedTest(REPETITIONS)
     void interactWithDatabase() {
-        var id = UUID.randomUUID();
-        var foo = UUID.randomUUID().toString();
-        database.executeUpdateSql("INSERT INTO some_table(id, foo) VALUES('%s', '%s')".formatted(id, foo));
+        UUID id = UUID.randomUUID();
+        String foo = UUID.randomUUID().toString();
+        database.executeUpdateSql("INSERT INTO some_table(id, foo) VALUES('" + id + "', '" + foo + "')");
 
         database.executeQuerySql("SELECT COUNT(*) FROM some_table", rs -> {
             assertThat(rs.next()).isTrue();

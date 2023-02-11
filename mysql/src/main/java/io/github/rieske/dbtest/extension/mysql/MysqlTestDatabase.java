@@ -22,7 +22,7 @@ class MysqlTestDatabase extends TestDatabase {
         this.container.withTmpFs(Map.of("/var/lib/mysql", "rw"));
         this.container.withCommand("mysqld", "--innodb_flush_method=nosync");
         this.container.start();
-        this.jdbcPrefix = "jdbc:mysql://%s:%s/".formatted(container.getHost(), container.getMappedPort(3306));
+        this.jdbcPrefix = "jdbc:mysql://" + container.getHost() + ":" + container.getMappedPort(3306) + "/";
     }
 
     @Override
@@ -57,7 +57,7 @@ class MysqlTestDatabase extends TestDatabase {
     }
 
     private void dumpDatabase() {
-        String command = "mysqldump -u root --password=%s %s > %s".formatted(container.getPassword(), getTemplateDatabaseName(), DB_DUMP_FILENAME);
+        String command = "mysqldump -u root --password=" + container.getPassword() + " " + getTemplateDatabaseName() + " > " + DB_DUMP_FILENAME;
         Container.ExecResult result = runInDatabaseContainer(command);
         if (result.getExitCode() != 0) {
             throw new RuntimeException("Error dumping database: " + result);
@@ -65,7 +65,7 @@ class MysqlTestDatabase extends TestDatabase {
     }
 
     private void restoreDatabase(String databaseName) {
-        String command = "mysql -u root --password=%s %s < %s".formatted(container.getPassword(), databaseName, DB_DUMP_FILENAME);
+        String command = "mysql -u root --password=" + container.getPassword() + " " + databaseName + " < " + DB_DUMP_FILENAME;
         Container.ExecResult result = runInDatabaseContainer(command);
         if (result.getExitCode() != 0) {
             throw new RuntimeException("Error restoring database: " + result);

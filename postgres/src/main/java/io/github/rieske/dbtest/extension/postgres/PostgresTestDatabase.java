@@ -17,7 +17,7 @@ class PostgresTestDatabase extends TestDatabase {
         this.container = new PostgreSQLContainer<>("postgres:" + version).withReuse(true);
         this.container.withTmpFs(Map.of("/var/lib/postgresql/data", "rw"));
         this.container.start();
-        this.jdbcPrefix = "jdbc:postgresql://%s:%s/".formatted(container.getHost(), container.getMappedPort(5432));
+        this.jdbcPrefix = "jdbc:postgresql://" + container.getHost() + ":" + container.getMappedPort(5432) + "/";
     }
 
     @Override

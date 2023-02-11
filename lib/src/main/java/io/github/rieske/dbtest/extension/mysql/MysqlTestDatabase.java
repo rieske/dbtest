@@ -22,7 +22,7 @@ class MysqlTestDatabase {
         JDBC_URI = "jdbc:mysql://%s:%s/".formatted(DB_CONTAINER.getHost(), DB_CONTAINER.getMappedPort(3306));
     }
 
-    String getMasterDatabaseName() {
+    String getTemplateDatabaseName() {
         return DB_CONTAINER.getDatabaseName();
     }
 
@@ -44,7 +44,7 @@ class MysqlTestDatabase {
     }
 
     void dumpDatabase(String dbDumpFilename) {
-        String command = "mysqldump -u root --password=%s %s > %s".formatted(DB_CONTAINER.getPassword(), getMasterDatabaseName(), dbDumpFilename);
+        String command = "mysqldump -u root --password=%s %s > %s".formatted(DB_CONTAINER.getPassword(), getTemplateDatabaseName(), dbDumpFilename);
         Container.ExecResult result = runInDatabaseContainer(command);
         if (result.getExitCode() != 0) {
             throw new RuntimeException("Error dumping database: " + result);

@@ -12,13 +12,13 @@ public abstract class PostgresFastTestExtension extends PostgresTestExtension {
             if (templateDatabaseMigrated) {
                 return;
             }
-            migrateDatabase(database.dataSourceForDatabase(database.getMasterDatabaseName()));
+            migrateDatabase(database.dataSourceForDatabase(database.getTemplateDatabaseName()));
             templateDatabaseMigrated = true;
         }
     }
 
     @Override
     protected void createFreshMigratedDatabase() {
-        database.executeInPostgresSchema("CREATE DATABASE " + databaseName + " TEMPLATE " + database.getMasterDatabaseName());
+        database.executeInPostgresSchema("CREATE DATABASE " + databaseName + " TEMPLATE " + database.getTemplateDatabaseName());
     }
 }

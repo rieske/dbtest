@@ -14,7 +14,7 @@ public abstract class MysqlFastTestExtension extends MysqlTestExtension {
             if (templateDatabaseMigrated) {
                 return;
             }
-            migrateDatabase(database.dataSourceForDatabase(database.getMasterDatabaseName()));
+            migrateDatabase(database.dataSourceForDatabase(database.getTemplateDatabaseName()));
             database.dumpDatabase(DB_DUMP_FILENAME);
             templateDatabaseMigrated = true;
         }

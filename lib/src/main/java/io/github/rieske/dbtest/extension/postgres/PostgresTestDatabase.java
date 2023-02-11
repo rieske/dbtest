@@ -19,7 +19,7 @@ class PostgresTestDatabase {
         JDBC_URI = "jdbc:postgresql://%s:%s/".formatted(DB_CONTAINER.getHost(), DB_CONTAINER.getMappedPort(5432));
     }
 
-    String getMasterDatabaseName() {
+    String getTemplateDatabaseName() {
         return DB_CONTAINER.getDatabaseName();
     }
 

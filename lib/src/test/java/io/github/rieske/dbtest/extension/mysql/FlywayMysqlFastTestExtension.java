@@ -5,6 +5,11 @@ import org.flywaydb.core.Flyway;
 import javax.sql.DataSource;
 
 public class FlywayMysqlFastTestExtension extends MysqlFastTestExtension{
+
+    public FlywayMysqlFastTestExtension(String databaseVersion) {
+        // TODO:
+    }
+
     @Override
     protected void migrateDatabase(DataSource dataSource) {
         Flyway.configure()

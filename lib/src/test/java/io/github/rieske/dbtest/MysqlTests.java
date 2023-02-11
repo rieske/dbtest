@@ -5,17 +5,16 @@ import io.github.rieske.dbtest.extension.mysql.FlywayMysqlSlowTestExtension;
 import org.junit.jupiter.api.Nested;
 
 class MysqlTests {
-    @Nested
-    class SlowTests extends DatabaseTest {
-        SlowTests() {
-            super(new FlywayMysqlSlowTestExtension());
+    abstract static class PostgresSlowAndFastTests extends SlowAndFastTests {
+        PostgresSlowAndFastTests(String version) {
+            super(version, FlywayMysqlSlowTestExtension::new, FlywayMysqlFastTestExtension::new);
         }
     }
 
     @Nested
-    class FastTests extends DatabaseTest {
-        FastTests() {
-            super(new FlywayMysqlFastTestExtension());
+    class MysqlDefaultTests extends PostgresSlowAndFastTests {
+        MysqlDefaultTests() {
+            super("TODO");
         }
     }
 }

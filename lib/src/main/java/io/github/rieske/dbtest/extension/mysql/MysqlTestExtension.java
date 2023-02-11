@@ -1,4 +1,4 @@
-package io.github.rieske.dbtest.mysql;
+package io.github.rieske.dbtest.extension.mysql;
 
 import com.mysql.cj.jdbc.MysqlDataSource;
 import io.github.rieske.dbtest.DatabaseTestExtension;

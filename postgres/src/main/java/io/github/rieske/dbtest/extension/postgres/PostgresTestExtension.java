@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 import javax.sql.DataSource;
 
-public abstract class PostgresTestExtension extends DatabaseTestExtension implements BeforeEachCallback, AfterEachCallback {
+abstract class PostgresTestExtension extends DatabaseTestExtension implements BeforeEachCallback, AfterEachCallback {
 
     protected final PostgresTestDatabase database;
 

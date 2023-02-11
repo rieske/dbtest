@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 import javax.sql.DataSource;
 
-public abstract class MysqlTestExtension extends DatabaseTestExtension implements BeforeEachCallback, AfterEachCallback {
+abstract class MysqlTestExtension extends DatabaseTestExtension implements BeforeEachCallback, AfterEachCallback {
     protected final MysqlTestDatabase database;
 
     MysqlTestExtension(String databaseVersion) {

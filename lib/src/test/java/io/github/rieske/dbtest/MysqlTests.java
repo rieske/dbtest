@@ -12,9 +12,23 @@ class MysqlTests {
     }
 
     @Nested
-    class MysqlDefaultTests extends PostgresSlowAndFastTests {
-        MysqlDefaultTests() {
-            super("TODO");
+    class Mysql8Tests extends PostgresSlowAndFastTests {
+        Mysql8Tests() {
+            super("8.0.32");
+        }
+    }
+
+    @Nested
+    class Mysql8031Tests extends PostgresSlowAndFastTests {
+        Mysql8031Tests() {
+            super("8.0.31");
+        }
+    }
+
+    @Nested
+    class Mysql8030Tests extends PostgresSlowAndFastTests {
+        Mysql8030Tests() {
+            super("8.0.30");
         }
     }
 }

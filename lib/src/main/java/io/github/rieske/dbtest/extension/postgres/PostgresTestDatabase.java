@@ -17,8 +17,8 @@ class PostgresTestDatabase {
 
     PostgresTestDatabase(String version) {
         this.container = new PostgreSQLContainer<>("postgres:" + version).withReuse(true);
-        container.withTmpFs(Map.of("/var/lib/postgresql/data", "rw"));
-        container.start();
+        this.container.withTmpFs(Map.of("/var/lib/postgresql/data", "rw"));
+        this.container.start();
         this.jdbcPrefix = "jdbc:postgresql://%s:%s/".formatted(container.getHost(), container.getMappedPort(5432));
     }
 

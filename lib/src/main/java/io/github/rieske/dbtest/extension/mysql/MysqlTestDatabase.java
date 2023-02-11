@@ -9,33 +9,52 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.function.Consumer;
 
 class MysqlTestDatabase {
-    private static final MySQLContainer<?> DB_CONTAINER =
-            new MySQLContainer<>("mysql:8.0.32").withReuse(true);
-    private static final String JDBC_URI;
+    private final MySQLContainer<?> container;
+    private final String jdbcPrefix;
 
-    static {
-        DB_CONTAINER.withTmpFs(Map.of("/var/lib/mysql", "rw"));
-        DB_CONTAINER.withCommand("mysqld", "--innodb_flush_method=nosync");
-        DB_CONTAINER.start();
-        JDBC_URI = "jdbc:mysql://%s:%s/".formatted(DB_CONTAINER.getHost(), DB_CONTAINER.getMappedPort(3306));
+    private volatile boolean templateDatabaseMigrated = false;
+
+    private static final String DB_DUMP_FILENAME = "db_dump.sql";
+
+    MysqlTestDatabase(String version) {
+        this.container = new MySQLContainer<>("mysql:" + version).withReuse(true);
+        this.container.withTmpFs(Map.of("/var/lib/mysql", "rw"));
+        this.container.withCommand("mysqld", "--innodb_flush_method=nosync");
+        this.container.start();
+        this.jdbcPrefix = "jdbc:mysql://%s:%s/".formatted(container.getHost(), container.getMappedPort(3306));
+    }
+
+    void migrateTemplate(Consumer<DataSource> migrator) {
+        if (templateDatabaseMigrated) {
+            return;
+        }
+        synchronized (this) {
+            if (templateDatabaseMigrated) {
+                return;
+            }
+            migrator.accept(dataSourceForDatabase(getTemplateDatabaseName()));
+            this.dumpDatabase();
+            templateDatabaseMigrated = true;
+        }
     }
 
     String getTemplateDatabaseName() {
-        return DB_CONTAINER.getDatabaseName();
+        return container.getDatabaseName();
     }
 
     DataSource dataSourceForDatabase(String databaseName) {
         var dataSource = new MysqlDataSource();
-        dataSource.setUrl(JDBC_URI + databaseName);
+        dataSource.setUrl(jdbcPrefix + databaseName);
         dataSource.setUser("root");
-        dataSource.setPassword(DB_CONTAINER.getPassword());
+        dataSource.setPassword(container.getPassword());
         return dataSource;
     }
 
     void executePrivileged(String sql) {
-        var dataSource = dataSourceForDatabase(DB_CONTAINER.getDatabaseName());
+        var dataSource = dataSourceForDatabase(container.getDatabaseName());
         try (Connection conn = dataSource.getConnection()) {
             conn.createStatement().execute(sql);
         } catch (SQLException e) {
@@ -43,25 +62,25 @@ class MysqlTestDatabase {
         }
     }
 
-    void dumpDatabase(String dbDumpFilename) {
-        String command = "mysqldump -u root --password=%s %s > %s".formatted(DB_CONTAINER.getPassword(), getTemplateDatabaseName(), dbDumpFilename);
+    void dumpDatabase() {
+        String command = "mysqldump -u root --password=%s %s > %s".formatted(container.getPassword(), getTemplateDatabaseName(), DB_DUMP_FILENAME);
         Container.ExecResult result = runInDatabaseContainer(command);
         if (result.getExitCode() != 0) {
             throw new RuntimeException("Error dumping database: " + result);
         }
     }
 
-    void restoreDatabase(String databaseName, String dbDumpFilename) {
-        String command = "mysql -u root --password=%s %s < %s".formatted(DB_CONTAINER.getPassword(), databaseName, dbDumpFilename);
+    void restoreDatabase(String databaseName) {
+        String command = "mysql -u root --password=%s %s < %s".formatted(container.getPassword(), databaseName, DB_DUMP_FILENAME);
         Container.ExecResult result = runInDatabaseContainer(command);
         if (result.getExitCode() != 0) {
             throw new RuntimeException("Error restoring database: " + result);
         }
     }
 
-    private static Container.ExecResult runInDatabaseContainer(String command) {
+    private Container.ExecResult runInDatabaseContainer(String command) {
         try {
-            return DB_CONTAINER.execInContainer("bash", "-c", command);
+            return container.execInContainer("bash", "-c", command);
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException("Error running command in database container: " + command, e);
         }

@@ -20,7 +20,13 @@ class MysqlTestDatabase extends TestDatabase {
     MysqlTestDatabase(String version) {
         this.container = new MySQLContainer<>("mysql:" + version).withReuse(true);
         this.container.withTmpFs(Map.of("/var/lib/mysql", "rw"));
-        this.container.withCommand("mysqld", "--innodb_flush_method=nosync");
+        this.container.withCommand(
+                "mysqld",
+                "--innodb-flush-method=nosync",
+                "--sync-binlog=0",
+                "--innodb-doublewrite=0",
+                "--innodb-flush-log-at-trx-commit=0"
+        );
         this.container.start();
         this.jdbcPrefix = "jdbc:mysql://" + container.getHost() + ":" + container.getMappedPort(3306) + "/";
     }

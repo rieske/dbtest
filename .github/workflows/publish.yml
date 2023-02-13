@@ -26,4 +26,4 @@ jobs:
           ORG_GRADLE_PROJECT_mavenPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
         uses: burrunan/gradle-cache-action@v1
         with:
-          arguments: publish
+          arguments: publish --no-configuration-cache

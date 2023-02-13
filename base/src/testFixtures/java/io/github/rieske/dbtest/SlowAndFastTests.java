@@ -21,14 +21,28 @@ public abstract class SlowAndFastTests {
     }
 
     @Nested
-    class SlowTests extends DatabaseTest {
+    class SlowDatabasePerTestMethodTest extends DatabasePerTestMethodTest {
+        SlowDatabasePerTestMethodTest() {
+            super(slowExtensionProvider.apply(databaseVersion));
+        }
+    }
+
+    @Nested
+    class FastDatabasePerTestMethodTest extends DatabasePerTestMethodTest {
+        FastDatabasePerTestMethodTest() {
+            super(fastExtensionProvider.apply(databaseVersion));
+        }
+    }
+
+    @Nested
+    class SlowTests extends DatabasePerformanceTest {
         SlowTests() {
             super(slowExtensionProvider.apply(databaseVersion));
         }
     }
 
     @Nested
-    class FastTests extends DatabaseTest {
+    class FastTests extends DatabasePerformanceTest {
         FastTests() {
             super(fastExtensionProvider.apply(databaseVersion));
         }

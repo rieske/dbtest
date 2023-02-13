@@ -30,8 +30,8 @@ publishing {
                     }
                 }
                 scm {
-                    connection = "scm:git:git@github.com:rieske/dbtest.git"
-                    developerConnection = "scm:git:git@github.com:rieske/dbtest.git"
+                    connection = "scm:git:git@github.com/rieske/dbtest.git"
+                    developerConnection = "scm:git:ssh@github.com:rieske/dbtest.git"
                     url = "https://github.com/rieske/dbtest"
                 }
             }

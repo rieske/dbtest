@@ -12,27 +12,29 @@ publishing {
     publications {
         maven(MavenPublication) {
             from(components.java)
-            pom {
-                name = "io.github.rieske.dbtest"
-                description = "Fast tests against containerized databases"
-                url = "https://github.com/rieske/dbtest"
-                licenses {
-                    license {
-                        name = "The Apache License, Version 2.0"
-                        url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
-                    }
-                }
-                developers {
-                    developer {
-                        id = "rieske"
-                        name = "Vaidotas Valuckas"
-                        email = "vaidotas.valuckas@gmail.com"
-                    }
-                }
-                scm {
-                    connection = "scm:git:git@github.com/rieske/dbtest.git"
-                    developerConnection = "scm:git:ssh@github.com:rieske/dbtest.git"
+            project.afterEvaluate {
+                pom {
+                    name = "${group}:${project.name}"
+                    description = "${project.description}"
                     url = "https://github.com/rieske/dbtest"
+                    licenses {
+                        license {
+                            name = "The Apache License, Version 2.0"
+                            url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = "rieske"
+                            name = "Vaidotas Valuckas"
+                            email = "vaidotas.valuckas@gmail.com"
+                        }
+                    }
+                    scm {
+                        connection = "scm:git:git@github.com/rieske/dbtest.git"
+                        developerConnection = "scm:git:ssh@github.com:rieske/dbtest.git"
+                        url = "https://github.com/rieske/dbtest"
+                    }
                 }
             }
         }

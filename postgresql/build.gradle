@@ -2,6 +2,8 @@ plugins {
     id("io.github.rieske.dbtest.published-library")
 }
 
+description = "Fast tests against containerized PostgreSQL database."
+
 dependencies {
     api(project(":base"))
 

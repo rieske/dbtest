@@ -1,8 +1,8 @@
-package io.github.rieske.dbtest.extension.postgres;
+package io.github.rieske.dbtest.extension.postgresql;
 
-public abstract class PostgresFastTestExtension extends PostgresTestExtension {
+public abstract class PostgreSQLFastTestExtension extends PostgreSQLTestExtension {
 
-    public PostgresFastTestExtension(String databaseVersion) {
+    public PostgreSQLFastTestExtension(String databaseVersion) {
         super(databaseVersion);
         database.migrateTemplateDatabase(this::migrateDatabase);
     }

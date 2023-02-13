@@ -1,4 +1,4 @@
-package io.github.rieske.dbtest.extension.postgres;
+package io.github.rieske.dbtest.extension.postgresql;
 
 import io.github.rieske.dbtest.extension.DatabaseTestExtension;
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -7,12 +7,12 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 import javax.sql.DataSource;
 
-abstract class PostgresTestExtension extends DatabaseTestExtension implements BeforeEachCallback, AfterEachCallback {
+abstract class PostgreSQLTestExtension extends DatabaseTestExtension implements BeforeEachCallback, AfterEachCallback {
 
-    protected final PostgresTestDatabase database;
+    protected final PostgreSQLTestDatabase database;
 
-    PostgresTestExtension(String databaseVersion) {
-        this.database = PostgresTestDatabaseManager.getDatabase(databaseVersion);
+    PostgreSQLTestExtension(String databaseVersion) {
+        this.database = PostgreSQLTestDatabaseManager.getDatabase(databaseVersion);
     }
 
     abstract protected void migrateDatabase(DataSource dataSource);

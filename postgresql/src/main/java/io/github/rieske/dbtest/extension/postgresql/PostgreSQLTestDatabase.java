@@ -1,4 +1,4 @@
-package io.github.rieske.dbtest.extension.postgres;
+package io.github.rieske.dbtest.extension.postgresql;
 
 import io.github.rieske.dbtest.extension.TestDatabase;
 import org.postgresql.ds.PGSimpleDataSource;
@@ -8,12 +8,12 @@ import javax.sql.DataSource;
 import java.util.Map;
 import java.util.function.Consumer;
 
-class PostgresTestDatabase extends TestDatabase {
+class PostgreSQLTestDatabase extends TestDatabase {
     private final PostgreSQLContainer<?> container;
     private final String jdbcPrefix;
 
     @SuppressWarnings("resource")
-    PostgresTestDatabase(String version) {
+    PostgreSQLTestDatabase(String version) {
         this.container = new PostgreSQLContainer<>("postgres:" + version).withReuse(true);
         this.container.withTmpFs(Map.of("/var/lib/postgresql/data", "rw"));
         this.container.start();

@@ -1,10 +1,10 @@
-package io.github.rieske.dbtest.extension.postgres;
+package io.github.rieske.dbtest.extension.postgresql;
 
 /**
  * Simulates the traditional approach of creating a fresh database and applying migrations for each test.
  */
-abstract class PostgresSlowTestExtension extends PostgresTestExtension {
-    PostgresSlowTestExtension(String databaseVersion) {
+abstract class PostgreSQLSlowTestExtension extends PostgreSQLTestExtension {
+    PostgreSQLSlowTestExtension(String databaseVersion) {
         super(databaseVersion);
     }
 

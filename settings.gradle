@@ -10,4 +10,4 @@ dependencyResolutionManagement {
 rootProject.name = "dbtest"
 include(":base")
 include(":mysql")
-include(":postgres")
+include(":postgresql")

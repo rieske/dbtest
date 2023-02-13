@@ -1,6 +1,6 @@
 package io.github.rieske.dbtest.extension.postgresql;
 
-import org.flywaydb.core.Flyway;
+import io.github.rieske.dbtest.FlywayMigrator;
 
 import javax.sql.DataSource;
 
@@ -11,9 +11,6 @@ public class FlywayPostgreSQLFastTestExtension extends PostgreSQLFastTestExtensi
 
     @Override
     protected void migrateDatabase(DataSource dataSource) {
-        Flyway.configure()
-                .dataSource(dataSource)
-                .load()
-                .migrate();
+        FlywayMigrator.migrateDatabase(dataSource);
     }
 }

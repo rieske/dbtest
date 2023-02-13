@@ -14,8 +14,6 @@ abstract class MysqlTestExtension extends DatabaseTestExtension implements Befor
         this.database = MysqlTestDatabaseManager.getDatabase(databaseVersion);
     }
 
-    abstract protected void migrateDatabase(DataSource dataSource);
-
     @Override
     public void beforeEach(ExtensionContext context) {
         createFreshMigratedDatabase();

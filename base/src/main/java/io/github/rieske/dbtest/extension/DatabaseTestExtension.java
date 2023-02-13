@@ -33,6 +33,8 @@ public abstract class DatabaseTestExtension implements Extension {
         }
     }
 
+    abstract protected void migrateDatabase(DataSource dataSource);
+
     protected abstract void createFreshMigratedDatabase();
 
     @FunctionalInterface

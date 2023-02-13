@@ -15,8 +15,6 @@ abstract class PostgreSQLTestExtension extends DatabaseTestExtension implements 
         this.database = PostgreSQLTestDatabaseManager.getDatabase(databaseVersion);
     }
 
-    abstract protected void migrateDatabase(DataSource dataSource);
-
     @Override
     public void beforeEach(ExtensionContext context) {
         createFreshMigratedDatabase();

@@ -10,14 +10,14 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.function.Consumer;
 
-class MysqlTestDatabase extends TestDatabase {
+class MySQLTestDatabase extends TestDatabase {
     private static final String DB_DUMP_FILENAME = "db_dump.sql";
 
     private final MySQLContainer<?> container;
     private final String jdbcPrefix;
 
     @SuppressWarnings("resource")
-    MysqlTestDatabase(String version) {
+    MySQLTestDatabase(String version) {
         this.container = new MySQLContainer<>("mysql:" + version).withReuse(true);
         this.container.withTmpFs(Map.of("/var/lib/mysql", "rw"));
         this.container.withCommand(

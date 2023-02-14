@@ -4,9 +4,9 @@ import io.github.rieske.dbtest.FlywayMigrator;
 
 import javax.sql.DataSource;
 
-public class FlywayMysqlFastTestExtension extends MysqlFastTestExtension {
+public class FlywayMySQLFastTestExtension extends MySQLFastTestExtension {
 
-    public FlywayMysqlFastTestExtension(String databaseVersion) {
+    public FlywayMySQLFastTestExtension(String databaseVersion) {
         super(databaseVersion);
     }
 

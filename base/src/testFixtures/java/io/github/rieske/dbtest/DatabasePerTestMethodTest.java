@@ -20,18 +20,12 @@ abstract class DatabasePerTestMethodTest extends DatabaseTest {
     @Order(0)
     @Test
     void createState() {
-        UUID id = UUID.randomUUID();
-        String foo = UUID.randomUUID().toString();
-        executeUpdateSql("INSERT INTO some_table(id, foo) VALUES('" + id + "', '" + foo + "')");
+        insertRandomRecord();
     }
 
     @Order(1)
     @Test
     void ensureNoState() {
-        executeQuerySql("SELECT COUNT(*) FROM some_table", rs -> {
-            assertThat(rs.next()).isTrue();
-            assertThat(rs.getLong(1)).isEqualTo(0);
-            return null;
-        });
+        assertRecordCount(0);
     }
 }

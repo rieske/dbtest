@@ -4,9 +4,9 @@ import io.github.rieske.dbtest.FlywayMigrator;
 
 import javax.sql.DataSource;
 
-public class FlywayMysqlSlowTestExtension extends MysqlSlowTestExtension {
+public class FlywayMySQLSlowTestExtension extends MySQLSlowTestExtension {
 
-    public FlywayMysqlSlowTestExtension(String databaseVersion) {
+    public FlywayMySQLSlowTestExtension(String databaseVersion) {
         super(databaseVersion);
     }
 

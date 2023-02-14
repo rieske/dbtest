@@ -1,13 +1,13 @@
 package io.github.rieske.dbtest;
 
-import io.github.rieske.dbtest.extension.mysql.FlywayMysqlFastTestExtension;
-import io.github.rieske.dbtest.extension.mysql.FlywayMysqlSlowTestExtension;
+import io.github.rieske.dbtest.extension.mysql.FlywayMySQLFastTestExtension;
+import io.github.rieske.dbtest.extension.mysql.FlywayMySQLSlowTestExtension;
 import org.junit.jupiter.api.Nested;
 
-class MysqlTests {
+class MySQLTests {
     abstract static class PostgresSlowAndFastTests extends SlowAndFastTests {
         PostgresSlowAndFastTests(String version) {
-            super(version, FlywayMysqlSlowTestExtension::new, FlywayMysqlFastTestExtension::new);
+            super(version, FlywayMySQLSlowTestExtension::new, FlywayMySQLFastTestExtension::new);
         }
     }
 

@@ -32,7 +32,7 @@ class MySQLTestDatabase extends TestDatabase {
     }
 
     @Override
-    protected void cloneTemplateDatabaseTo(String targetDatabaseName) {
+    public void cloneTemplateDatabaseTo(String targetDatabaseName) {
         createDatabase(targetDatabaseName);
         restoreDatabase(targetDatabaseName);
     }

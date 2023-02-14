@@ -21,7 +21,7 @@ class PostgreSQLTestDatabase extends TestDatabase {
     }
 
     @Override
-    protected void cloneTemplateDatabaseTo(String targetDatabaseName) {
+    public void cloneTemplateDatabaseTo(String targetDatabaseName) {
         executePrivileged("CREATE DATABASE " + targetDatabaseName + " TEMPLATE " + getTemplateDatabaseName());
     }
 

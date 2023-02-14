@@ -24,11 +24,8 @@ abstract class DatabasePerformanceTest extends DatabaseTest {
         String foo = UUID.randomUUID().toString();
         executeUpdateSql("INSERT INTO some_table(id, foo) VALUES('" + id + "', '" + foo + "')");
 
-        executeQuerySql("SELECT COUNT(*) FROM some_table", rs -> {
-            assertThat(rs.next()).isTrue();
-            assertThat(rs.getLong(1)).isEqualTo(1);
-            return null;
-        });
+        assertRecordCount(1);
+
         executeQuerySql("SELECT * FROM some_table", rs -> {
             assertThat(rs.next()).isTrue();
             assertThat(UUID.fromString(rs.getString(1))).isEqualTo(id);

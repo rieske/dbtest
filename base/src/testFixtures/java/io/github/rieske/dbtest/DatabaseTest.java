@@ -20,6 +20,20 @@ abstract class DatabaseTest {
         this.database = database;
     }
 
+    protected void insertRandomRecord() {
+        UUID id = UUID.randomUUID();
+        String foo = UUID.randomUUID().toString();
+        executeUpdateSql("INSERT INTO some_table(id, foo) VALUES('" + id + "', '" + foo + "')");
+    }
+
+    protected void assertRecordCount(int expectedCount) {
+        executeQuerySql("SELECT COUNT(*) FROM some_table", rs -> {
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getInt(1)).isEqualTo(expectedCount);
+            return null;
+        });
+    }
+
     protected void executeUpdateSql(String sql) {
         try (Connection connection = database.getDataSource().getConnection();
              Statement stmt = connection.createStatement()) {

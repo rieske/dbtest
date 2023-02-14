@@ -1,20 +1,22 @@
 package io.github.rieske.dbtest;
 
 import io.github.rieske.dbtest.extension.DatabaseTestExtension;
+import org.junit.jupiter.api.ClassOrderer;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestClassOrder;
 import org.junit.jupiter.api.TestMethodOrder;
 
 import java.util.function.Function;
 
-public abstract class DatabasePerTestMethodTest {
+public abstract class DatabasePerTestClassTest {
     private final String databaseVersion;
     private final Function<String, DatabaseTestExtension> slowExtensionProvider;
     private final Function<String, DatabaseTestExtension> fastExtensionProvider;
 
-    public DatabasePerTestMethodTest(
+    public DatabasePerTestClassTest(
             String databaseVersion,
             Function<String, DatabaseTestExtension> slowExtensionProvider,
             Function<String, DatabaseTestExtension> fastExtensionProvider
@@ -38,7 +40,7 @@ public abstract class DatabasePerTestMethodTest {
         }
     }
 
-    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    @TestClassOrder(ClassOrderer.OrderAnnotation.class)
     abstract static class TestTemplate extends DatabaseTest {
 
         TestTemplate(DatabaseTestExtension database) {
@@ -46,17 +48,41 @@ public abstract class DatabasePerTestMethodTest {
         }
 
         @Order(0)
-        @Test
-        void createState() {
-            assertRecordCount(0);
-            insertRandomRecord();
-            assertRecordCount(1);
+        @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+        @Nested
+        class FirstTestClass {
+            @Order(0)
+            @Test
+            void createState() {
+                assertRecordCount(0);
+                insertRandomRecord();
+                assertRecordCount(1);
+            }
+
+            @Order(1)
+            @Test
+            void ensureState() {
+                assertRecordCount(1);
+            }
         }
 
         @Order(1)
-        @Test
-        void ensureNoState() {
-            assertRecordCount(0);
+        @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+        @Nested
+        class SecondTestClass {
+            @Order(0)
+            @Test
+            void createState() {
+                assertRecordCount(0);
+                insertRandomRecord();
+                assertRecordCount(1);
+            }
+
+            @Order(1)
+            @Test
+            void ensureState() {
+                assertRecordCount(1);
+            }
         }
     }
 }

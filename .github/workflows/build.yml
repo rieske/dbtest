@@ -3,7 +3,6 @@ on:
 
 jobs:
   build:
-    name: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -17,18 +16,65 @@ jobs:
         with:
           arguments: build
 
+  postgres-tests:
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        postgres: [ 15.2-alpine, 14.7-alpine, 13.10-alpine ]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: 11
+          distribution: temurin
+      - name: Test PostgreSQL versions
+        uses: burrunan/gradle-cache-action@v1
+        env:
+          POSTGRES_VERSION: ${{ matrix.postgres }}
+        with:
+          arguments: :postgresql:test
+
+  mysql-tests:
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        mysql: [ 8.0.32, 8.0.31, 8.0.30 ]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: 11
+          distribution: temurin
+      - name: Test MySQL versions
+        uses: burrunan/gradle-cache-action@v1
+        env:
+          MYSQL_VERSION: ${{ matrix.mysql }}
+        with:
+          arguments: :mysql:test
+
   results:
     if: ${{ always() }}
     runs-on: ubuntu-latest
     name: Build Outcome
-    needs: [ build ]
+    needs: [ build, postgres-tests, mysql-tests ]
     steps:
       - run: |
-          result="${{ needs.build.result }}"
-          if [[ $result == "success" || $result == "skipped" ]]; then
-            exit 0
-          else
+          buildResult="${{ needs.build.result }}"
+          if [[ $buildResult != "success" && $buildResult != "skipped" ]]; then
             exit 1
           fi
+          postgresTestResult="${{ needs.postgres-tests.result }}"
+          if [[ $postgresTestResult != "success" && $postgresTestResult != "skipped" ]]; then
+            exit 1
+          fi
+          mysqlTestResult="${{ needs.mysql-tests.result }}"
+          if [[ $mysqlTestResult != "success" && $mysqlTestResult != "skipped" ]]; then
+            exit 1
+          fi
+          exit 0
 
 

@@ -19,6 +19,13 @@ testing {
                 implementation("org.flywaydb:flyway-mysql:9.14.1")
                 implementation(project.dependencies.testFixtures(project(":base")))
             }
+            targets {
+                all {
+                    testTask.configure {
+                        inputs.property("MYSQL_VERSION", System.getenv("MYSQL_VERSION")).optional(true)
+                    }
+                }
+            }
         }
     }
 }

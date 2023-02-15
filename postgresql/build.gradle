@@ -18,6 +18,13 @@ testing {
                 implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.19.0")
                 implementation(project.dependencies.testFixtures(project(":base")))
             }
+            targets {
+                all {
+                    testTask.configure {
+                        inputs.property("POSTGRES_VERSION", System.getenv("POSTGRES_VERSION")).optional(true)
+                    }
+                }
+            }
         }
     }
 }

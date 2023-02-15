@@ -2,6 +2,11 @@ plugins {
     id("java-library")
 }
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 testing {
     suites {
         test {
@@ -16,4 +21,8 @@ testing {
             }
         }
     }
+}
+
+tasks.withType(Javadoc).configureEach {
+    options.addStringOption("Xwerror", "-quiet")
 }

@@ -13,11 +13,11 @@ public abstract class MySQLFastTestExtension extends MySQLTestExtension {
      */
     public MySQLFastTestExtension(String databaseVersion) {
         super(databaseVersion);
-        database.migrateTemplateDatabase(this::migrateDatabase);
+        migrateTemplateDatabase();
     }
 
     @Override
     void createFreshMigratedDatabase() {
-        database.cloneTemplateDatabaseTo(databaseName);
+        cloneTemplateDatabaseToTestDatabase();
     }
 }

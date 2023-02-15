@@ -10,7 +10,7 @@ abstract class MySQLSlowTestExtension extends MySQLTestExtension {
 
     @Override
     void createFreshMigratedDatabase() {
-        database.createDatabase(databaseName);
+        createEmptyTestDatabase();
         migrateDatabase(getDataSource());
     }
 }

@@ -13,11 +13,11 @@ public abstract class PostgreSQLFastTestExtension extends PostgreSQLTestExtensio
      */
     public PostgreSQLFastTestExtension(String databaseVersion) {
         super(databaseVersion);
-        database.migrateTemplateDatabase(this::migrateDatabase);
+        migrateTemplateDatabase();
     }
 
     @Override
     void createFreshMigratedDatabase() {
-        database.cloneTemplateDatabaseTo(databaseName);
+        cloneTemplateDatabaseToTestDatabase();
     }
 }

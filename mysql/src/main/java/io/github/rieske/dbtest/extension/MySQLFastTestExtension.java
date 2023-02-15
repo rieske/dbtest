@@ -1,4 +1,4 @@
-package io.github.rieske.dbtest.extension.mysql;
+package io.github.rieske.dbtest.extension;
 
 /**
  * JUnit5 extension that enables you to write tests against a containerized MySQL database.
@@ -17,7 +17,7 @@ public abstract class MySQLFastTestExtension extends MySQLTestExtension {
     }
 
     @Override
-    protected void createFreshMigratedDatabase() {
+    void createFreshMigratedDatabase() {
         database.cloneTemplateDatabaseTo(databaseName);
     }
 }

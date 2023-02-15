@@ -1,4 +1,4 @@
-package io.github.rieske.dbtest.extension.postgresql;
+package io.github.rieske.dbtest.extension;
 
 /**
  * JUnit5 extension that enables you to write tests against a containerized PostgreSQL database.
@@ -17,7 +17,7 @@ public abstract class PostgreSQLFastTestExtension extends PostgreSQLTestExtensio
     }
 
     @Override
-    protected void createFreshMigratedDatabase() {
+    void createFreshMigratedDatabase() {
         database.cloneTemplateDatabaseTo(databaseName);
     }
 }

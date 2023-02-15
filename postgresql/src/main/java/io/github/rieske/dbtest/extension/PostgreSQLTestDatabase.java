@@ -1,4 +1,4 @@
-package io.github.rieske.dbtest.extension.postgresql;
+package io.github.rieske.dbtest.extension;
 
 import io.github.rieske.dbtest.extension.TestDatabase;
 import org.postgresql.ds.PGSimpleDataSource;
@@ -21,17 +21,17 @@ class PostgreSQLTestDatabase extends TestDatabase {
     }
 
     @Override
-    public void cloneTemplateDatabaseTo(String targetDatabaseName) {
+    void cloneTemplateDatabaseTo(String targetDatabaseName) {
         executePrivileged("CREATE DATABASE " + targetDatabaseName + " TEMPLATE " + getTemplateDatabaseName());
     }
 
     @Override
-    protected void migrateTemplateDatabase(Consumer<DataSource> migrator, DataSource templateDataSource) {
+    void migrateTemplateDatabase(Consumer<DataSource> migrator, DataSource templateDataSource) {
         migrator.accept(dataSourceForDatabase(getTemplateDatabaseName()));
     }
 
     @Override
-    protected DataSource dataSourceForDatabase(String databaseName) {
+    DataSource dataSourceForDatabase(String databaseName) {
         PGSimpleDataSource dataSource = new PGSimpleDataSource();
         dataSource.setUrl(jdbcPrefix + databaseName);
         dataSource.setUser(container.getUsername());
@@ -40,12 +40,12 @@ class PostgreSQLTestDatabase extends TestDatabase {
     }
 
     @Override
-    protected String getTemplateDatabaseName() {
+    String getTemplateDatabaseName() {
         return container.getDatabaseName();
     }
 
     @Override
-    protected DataSource getPrivilegedDataSource() {
+    DataSource getPrivilegedDataSource() {
         return dataSourceForDatabase("postgres");
     }
 }

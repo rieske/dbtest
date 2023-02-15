@@ -1,4 +1,4 @@
-package io.github.rieske.dbtest.extension.postgresql;
+package io.github.rieske.dbtest.extension;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

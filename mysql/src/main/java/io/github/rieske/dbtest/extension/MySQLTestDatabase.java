@@ -1,4 +1,4 @@
-package io.github.rieske.dbtest.extension.mysql;
+package io.github.rieske.dbtest.extension;
 
 import com.mysql.cj.jdbc.MysqlDataSource;
 import io.github.rieske.dbtest.extension.TestDatabase;
@@ -32,19 +32,19 @@ class MySQLTestDatabase extends TestDatabase {
     }
 
     @Override
-    public void cloneTemplateDatabaseTo(String targetDatabaseName) {
+    void cloneTemplateDatabaseTo(String targetDatabaseName) {
         createDatabase(targetDatabaseName);
         restoreDatabase(targetDatabaseName);
     }
 
     @Override
-    protected void migrateTemplateDatabase(Consumer<DataSource> migrator, DataSource templateDataSource) {
+    void migrateTemplateDatabase(Consumer<DataSource> migrator, DataSource templateDataSource) {
         migrator.accept(templateDataSource);
         dumpDatabase();
     }
 
     @Override
-    protected DataSource dataSourceForDatabase(String databaseName) {
+    DataSource dataSourceForDatabase(String databaseName) {
         MysqlDataSource dataSource = new MysqlDataSource();
         dataSource.setUrl(jdbcPrefix + databaseName);
         dataSource.setUser("root");
@@ -53,12 +53,12 @@ class MySQLTestDatabase extends TestDatabase {
     }
 
     @Override
-    protected String getTemplateDatabaseName() {
+    String getTemplateDatabaseName() {
         return container.getDatabaseName();
     }
 
     @Override
-    protected DataSource getPrivilegedDataSource() {
+    DataSource getPrivilegedDataSource() {
         return dataSourceForDatabase(container.getDatabaseName());
     }
 

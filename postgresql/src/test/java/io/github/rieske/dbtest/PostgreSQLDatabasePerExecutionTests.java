@@ -1,7 +1,7 @@
 package io.github.rieske.dbtest;
 
-import io.github.rieske.dbtest.extension.postgresql.FlywayPostgreSQLFastTestExtension;
-import io.github.rieske.dbtest.extension.postgresql.FlywayPostgreSQLSlowTestExtension;
+import io.github.rieske.dbtest.extension.FlywayPostgreSQLFastTestExtension;
+import io.github.rieske.dbtest.extension.FlywayPostgreSQLSlowTestExtension;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 

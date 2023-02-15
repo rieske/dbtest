@@ -1,7 +1,7 @@
 package io.github.rieske.dbtest;
 
-import io.github.rieske.dbtest.extension.mysql.FlywayMySQLFastTestExtension;
-import io.github.rieske.dbtest.extension.mysql.FlywayMySQLSlowTestExtension;
+import io.github.rieske.dbtest.extension.FlywayMySQLFastTestExtension;
+import io.github.rieske.dbtest.extension.FlywayMySQLSlowTestExtension;
 import org.junit.jupiter.api.Nested;
 
 class MySQLPerformanceTests {

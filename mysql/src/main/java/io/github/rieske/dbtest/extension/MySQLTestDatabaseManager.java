@@ -1,4 +1,4 @@
-package io.github.rieske.dbtest.extension.mysql;
+package io.github.rieske.dbtest.extension;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

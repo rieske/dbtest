@@ -1,11 +1,12 @@
-package io.github.rieske.dbtest.extension.postgresql;
+package io.github.rieske.dbtest.extension;
 
 import io.github.rieske.dbtest.FlywayMigrator;
 
 import javax.sql.DataSource;
 
-public class FlywayPostgreSQLSlowTestExtension extends PostgreSQLSlowTestExtension {
-    public FlywayPostgreSQLSlowTestExtension(String databaseVersion) {
+public class FlywayMySQLFastTestExtension extends MySQLFastTestExtension {
+
+    public FlywayMySQLFastTestExtension(String databaseVersion) {
         super(databaseVersion);
     }
 

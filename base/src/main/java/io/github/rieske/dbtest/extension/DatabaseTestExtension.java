@@ -12,7 +12,7 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
     protected final TestDatabase database;
     protected final String databaseName = "testdb_" + UUID.randomUUID().toString().replace('-', '_');
 
-    protected DatabaseTestExtension(TestDatabase database) {
+    DatabaseTestExtension(TestDatabase database) {
         this.database = database;
     }
 
@@ -38,5 +38,5 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
 
     abstract protected void migrateDatabase(DataSource dataSource);
 
-    protected abstract void createFreshMigratedDatabase();
+    abstract void createFreshMigratedDatabase();
 }

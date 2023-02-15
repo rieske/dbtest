@@ -1,4 +1,4 @@
-package io.github.rieske.dbtest.extension.postgresql;
+package io.github.rieske.dbtest.extension;
 
 import io.github.rieske.dbtest.FlywayMigrator;
 

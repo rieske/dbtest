@@ -5,10 +5,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.function.Consumer;
 
-public abstract class TestDatabase {
+abstract class TestDatabase {
     private volatile boolean templateDatabaseMigrated = false;
 
-    public void migrateTemplateDatabase(Consumer<DataSource> migrator) {
+    void migrateTemplateDatabase(Consumer<DataSource> migrator) {
         if (templateDatabaseMigrated) {
             return;
         }
@@ -21,17 +21,17 @@ public abstract class TestDatabase {
         }
     }
 
-    public void createDatabase(String databaseName) {
+    void createDatabase(String databaseName) {
         executePrivileged("CREATE DATABASE " + databaseName);
     }
 
-    public void dropDatabase(String databaseName) {
+    void dropDatabase(String databaseName) {
         executePrivileged("DROP DATABASE " + databaseName);
     }
 
-    public abstract void cloneTemplateDatabaseTo(String targetDatabaseName);
+    abstract void cloneTemplateDatabaseTo(String targetDatabaseName);
 
-    protected void executePrivileged(String sql) {
+    void executePrivileged(String sql) {
         DataSource dataSource = getPrivilegedDataSource();
         try (Connection conn = dataSource.getConnection()) {
             conn.createStatement().execute(sql);
@@ -40,11 +40,11 @@ public abstract class TestDatabase {
         }
     }
 
-    protected abstract DataSource dataSourceForDatabase(String databaseName);
+    abstract DataSource dataSourceForDatabase(String databaseName);
 
-    protected abstract String getTemplateDatabaseName();
+    abstract String getTemplateDatabaseName();
 
-    protected abstract DataSource getPrivilegedDataSource();
+    abstract DataSource getPrivilegedDataSource();
 
-    protected abstract void migrateTemplateDatabase(Consumer<DataSource> migrator, DataSource templateDataSource);
+    abstract void migrateTemplateDatabase(Consumer<DataSource> migrator, DataSource templateDataSource);
 }

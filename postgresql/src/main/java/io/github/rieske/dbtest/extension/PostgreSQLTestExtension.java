@@ -1,6 +1,4 @@
-package io.github.rieske.dbtest.extension.postgresql;
-
-import io.github.rieske.dbtest.extension.DatabaseTestExtension;
+package io.github.rieske.dbtest.extension;
 
 abstract class PostgreSQLTestExtension extends DatabaseTestExtension {
 

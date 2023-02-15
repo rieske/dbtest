@@ -29,6 +29,8 @@ public abstract class TestDatabase {
         executePrivileged("DROP DATABASE " + databaseName);
     }
 
+    public abstract void cloneTemplateDatabaseTo(String targetDatabaseName);
+
     protected void executePrivileged(String sql) {
         DataSource dataSource = getPrivilegedDataSource();
         try (Connection conn = dataSource.getConnection()) {
@@ -37,8 +39,6 @@ public abstract class TestDatabase {
             throw new RuntimeException(e);
         }
     }
-
-    protected abstract void cloneTemplateDatabaseTo(String targetDatabaseName);
 
     protected abstract DataSource dataSourceForDatabase(String databaseName);
 

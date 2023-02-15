@@ -10,7 +10,7 @@ abstract class PostgreSQLSlowTestExtension extends PostgreSQLTestExtension {
 
     @Override
     void createFreshMigratedDatabase() {
-        database.createDatabase(databaseName);
+        createEmptyTestDatabase();
         migrateDatabase(getDataSource());
     }
 }

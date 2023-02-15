@@ -8,9 +8,13 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import javax.sql.DataSource;
 import java.util.UUID;
 
+/**
+ * Base class for concrete database test extension implementations.
+ * Encapsulates the core extension behavior that does not rely on backing database specifics.
+ */
 public abstract class DatabaseTestExtension implements Extension, BeforeEachCallback, AfterEachCallback {
-    protected final TestDatabase database;
-    protected final String databaseName = "testdb_" + UUID.randomUUID().toString().replace('-', '_');
+    private final TestDatabase database;
+    private final String databaseName = "testdb_" + UUID.randomUUID().toString().replace('-', '_');
 
     DatabaseTestExtension(TestDatabase database) {
         this.database = database;
@@ -36,7 +40,25 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
         return database.dataSourceForDatabase(databaseName);
     }
 
+    /**
+     * Implement this method to apply migrations to the test database.
+     * The extension will ensure that the database exposed to the testing code is migrated.
+     *
+     * @param dataSource to use with database migration tool of your choice
+     */
     abstract protected void migrateDatabase(DataSource dataSource);
 
     abstract void createFreshMigratedDatabase();
+
+    void migrateTemplateDatabase() {
+        database.migrateTemplateDatabase(this::migrateDatabase);
+    }
+
+    void cloneTemplateDatabaseToTestDatabase() {
+        database.cloneTemplateDatabaseTo(databaseName);
+    }
+
+    void createEmptyTestDatabase() {
+        database.createDatabase(databaseName);
+    }
 }

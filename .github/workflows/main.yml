@@ -3,7 +3,7 @@ concurrency: main
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
 
 jobs:
   build:

@@ -1,6 +1,5 @@
 package io.github.rieske.dbtest.extension;
 
-import io.github.rieske.dbtest.extension.TestDatabase;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.testcontainers.containers.PostgreSQLContainer;
 

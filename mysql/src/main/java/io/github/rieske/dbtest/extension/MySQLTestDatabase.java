@@ -1,7 +1,6 @@
 package io.github.rieske.dbtest.extension;
 
 import com.mysql.cj.jdbc.MysqlDataSource;
-import io.github.rieske.dbtest.extension.TestDatabase;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.MySQLContainer;
 

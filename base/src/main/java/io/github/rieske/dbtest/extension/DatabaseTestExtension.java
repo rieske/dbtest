@@ -6,9 +6,6 @@ import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import javax.sql.DataSource;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Base class for concrete database test extension implementations.
@@ -31,53 +28,39 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
         /**
          * Create a single database per JVM process. Any state written by tests will be visible to other tests.
          */
-        DATABASE_PER_EXECUTION
-    }
+        DATABASE_PER_EXECUTION;
 
-    private static class DatabaseState {
-        final Class<?> key;
-        final String name;
-        final boolean created;
-
-        private DatabaseState(Class<?> key, String name, boolean created) {
-            this.key = key;
-            this.name = name;
-            this.created = created;
+        private DatabaseStateStrategy toStrategy(TestDatabase database) {
+            switch (this) {
+                case DATABASE_PER_TEST_METHOD:
+                    return new PerMethodStrategy(database);
+                case DATABASE_PER_TEST_CLASS:
+                    return new PerClassStrategy(database);
+                case DATABASE_PER_EXECUTION:
+                    return new PerExecutionStrategy(database);
+                default:
+                    throw new IllegalStateException("No strategy exists for " + this + " mode");
+            }
         }
     }
 
-    private static final Map<Class<?>, DatabaseState> CLASS_DATABASE_STATES = new ConcurrentHashMap<>();
-    private static volatile DatabaseState EXECUTION_DATABASE_STATE = newDatabaseState(null);
-    private final Mode mode;
     private final TestDatabase database;
-    private volatile DatabaseState databaseState;
+    private final DatabaseStateStrategy stateStrategy;
 
     DatabaseTestExtension(TestDatabase database, Mode mode) {
         this.database = database;
-        this.mode = mode;
+        this.stateStrategy = mode.toStrategy(database);
     }
 
     @Override
     public void beforeEach(ExtensionContext context) {
-        switch (mode) {
-            case DATABASE_PER_TEST_METHOD:
-                this.databaseState = newDatabaseState(null);
-                break;
-            case DATABASE_PER_TEST_CLASS:
-                this.databaseState = CLASS_DATABASE_STATES.computeIfAbsent(context.getRequiredTestClass(), DatabaseTestExtension::newDatabaseState);
-                break;
-            case DATABASE_PER_EXECUTION:
-                this.databaseState = EXECUTION_DATABASE_STATE;
-                break;
-        }
+        stateStrategy.beforeTest(context.getRequiredTestClass());
         createFreshMigratedDatabase();
     }
 
     @Override
     public void afterEach(ExtensionContext context) {
-        if (mode == Mode.DATABASE_PER_TEST_METHOD) {
-            database.dropDatabase(databaseState.name);
-        }
+        stateStrategy.afterTest();
     }
 
     /**
@@ -87,7 +70,7 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
      * @return dataSource for a migrated database
      */
     public DataSource getDataSource() {
-        return database.dataSourceForDatabase(databaseState.name);
+        return stateStrategy.getDataSource();
     }
 
     /**
@@ -105,84 +88,10 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
     }
 
     void cloneTemplateDatabaseToTestDatabase() {
-        switch (mode) {
-            case DATABASE_PER_TEST_METHOD:
-                database.cloneTemplateDatabaseTo(databaseState.name);
-                break;
-            case DATABASE_PER_TEST_CLASS:
-                if (!CLASS_DATABASE_STATES.get(databaseState.key).created) {
-                    synchronized (CLASS_DATABASE_STATES) {
-                        if (CLASS_DATABASE_STATES.get(databaseState.key).created) {
-                            return;
-                        }
-                        database.cloneTemplateDatabaseTo(databaseState.name);
-                        this.databaseState = new DatabaseState(databaseState.key, databaseState.name, true);
-                        CLASS_DATABASE_STATES.put(databaseState.key, this.databaseState);
-                    }
-                }
-                break;
-            case DATABASE_PER_EXECUTION: {
-                if (!EXECUTION_DATABASE_STATE.created) {
-                    synchronized (DatabaseTestExtension.class) {
-                        if (EXECUTION_DATABASE_STATE.created) {
-                            return;
-                        }
-                        database.cloneTemplateDatabaseTo(databaseState.name);
-                        this.databaseState = new DatabaseState(databaseState.key, databaseState.name, true);
-                        EXECUTION_DATABASE_STATE = this.databaseState;
-                    }
-                }
-                break;
-            }
-        }
+        stateStrategy.cloneTemplateDatabaseToTestDatabase();
     }
 
     void createAndMigrateDatabase() {
-        switch (mode) {
-            case DATABASE_PER_TEST_METHOD:
-                if (!databaseState.created) {
-                    synchronized (this) {
-                        if (databaseState.created) {
-                            return;
-                        }
-                        database.createDatabase(databaseState.name);
-                        migrateDatabase(getDataSource());
-                        this.databaseState = new DatabaseState(databaseState.key, databaseState.name, true);
-                    }
-                }
-                break;
-            case DATABASE_PER_TEST_CLASS: {
-                if (!CLASS_DATABASE_STATES.get(databaseState.key).created) {
-                    synchronized (CLASS_DATABASE_STATES) {
-                        if (CLASS_DATABASE_STATES.get(databaseState.key).created) {
-                            return;
-                        }
-                        database.createDatabase(databaseState.name);
-                        migrateDatabase(getDataSource());
-                        this.databaseState = new DatabaseState(databaseState.key, databaseState.name, true);
-                        CLASS_DATABASE_STATES.put(databaseState.key, this.databaseState);
-                    }
-                }
-                break;
-            }
-            case DATABASE_PER_EXECUTION: {
-                if (!EXECUTION_DATABASE_STATE.created) {
-                    synchronized (DatabaseTestExtension.class) {
-                        if (EXECUTION_DATABASE_STATE.created) {
-                            return;
-                        }
-                        database.createDatabase(databaseState.name);
-                        migrateDatabase(getDataSource());
-                        this.databaseState = new DatabaseState(databaseState.key, databaseState.name, true);
-                        EXECUTION_DATABASE_STATE = this.databaseState;
-                    }
-                }
-                break;
-            }
-        }
-    }
-
-    private static DatabaseState newDatabaseState(Class<?> key) {
-        return new DatabaseState(key, "testdb_" + UUID.randomUUID().toString().replace('-', '_'), false);
+        stateStrategy.createAndMigrateDatabase(this::migrateDatabase);
     }
 }

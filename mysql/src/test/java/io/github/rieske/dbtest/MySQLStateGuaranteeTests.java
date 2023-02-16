@@ -1,31 +1,27 @@
 package io.github.rieske.dbtest;
 
-import io.github.rieske.dbtest.extension.FlywayMySQLFastTestExtension;
-import io.github.rieske.dbtest.extension.FlywayMySQLSlowTestExtension;
-import org.junit.jupiter.api.Disabled;
+import io.github.rieske.dbtest.extension.DatabaseTestExtension;
 import org.junit.jupiter.api.Nested;
 
 class MySQLStateGuaranteeTests implements MySQLTest {
     @Nested
     class MySQLDatabasePerTestMethodTest extends DatabasePerTestMethodTest {
         MySQLDatabasePerTestMethodTest() {
-            super(mysqlVersion(), FlywayMySQLSlowTestExtension::new, FlywayMySQLFastTestExtension::new);
+            super(slowExtension(DatabaseTestExtension.Mode.DATABASE_PER_TEST_METHOD), fastExtension(DatabaseTestExtension.Mode.DATABASE_PER_TEST_METHOD));
         }
     }
 
-    @Disabled("not yet implemented")
     @Nested
     class MySQLDatabasePerTestClassTest extends DatabasePerTestClassTest {
         MySQLDatabasePerTestClassTest() {
-            super(mysqlVersion(), FlywayMySQLSlowTestExtension::new, FlywayMySQLFastTestExtension::new);
+            super(slowExtension(DatabaseTestExtension.Mode.DATABASE_PER_TEST_CLASS), fastExtension(DatabaseTestExtension.Mode.DATABASE_PER_TEST_CLASS));
         }
     }
 
-    @Disabled("not yet implemented")
     @Nested
     class MySQLDatabasePerExecutionTest extends DatabasePerExecutionTest {
         MySQLDatabasePerExecutionTest() {
-            super(mysqlVersion(), FlywayMySQLSlowTestExtension::new, FlywayMySQLFastTestExtension::new);
+            super(slowExtension(DatabaseTestExtension.Mode.DATABASE_PER_EXECUTION), fastExtension(DatabaseTestExtension.Mode.DATABASE_PER_EXECUTION));
         }
     }
 }

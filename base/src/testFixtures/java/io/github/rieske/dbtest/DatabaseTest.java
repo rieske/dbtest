@@ -25,12 +25,15 @@ abstract class DatabaseTest {
         executeUpdateSql("INSERT INTO some_table(id, foo) VALUES('" + id + "', '" + foo + "')");
     }
 
-    protected void assertRecordCount(int expectedCount) {
-        executeQuerySql("SELECT COUNT(*) FROM some_table", rs -> {
+    protected int getRecordCount() {
+        return executeQuerySql("SELECT COUNT(*) FROM some_table", rs -> {
             assertThat(rs.next()).isTrue();
-            assertThat(rs.getInt(1)).isEqualTo(expectedCount);
-            return null;
+            return rs.getInt(1);
         });
+    }
+
+    protected void assertRecordCount(int expectedCount) {
+        assertThat(getRecordCount()).isEqualTo(expectedCount);
     }
 
     protected void executeUpdateSql(String sql) {

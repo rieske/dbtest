@@ -23,7 +23,11 @@ abstract class DatabaseStateStrategy {
 
     abstract void createAndMigrateDatabase(Consumer<DataSource> migrator);
 
-    abstract DataSource getDataSource();
+    protected abstract String getDatabaseName();
+
+    DataSource getDataSource() {
+        return database.dataSourceForDatabase(getDatabaseName());
+    }
 
     protected static String newDatabaseName() {
         return "testdb_" + UUID.randomUUID().toString().replace('-', '_');
@@ -54,8 +58,8 @@ class PerMethodStrategy extends DatabaseStateStrategy {
     }
 
     @Override
-    DataSource getDataSource() {
-        return database.dataSourceForDatabase(databaseName);
+    protected String getDatabaseName() {
+        return databaseName;
     }
 }
 
@@ -101,6 +105,11 @@ class PerClassStrategy extends DatabaseStateStrategy {
         });
     }
 
+    @Override
+    protected String getDatabaseName() {
+        return databaseName;
+    }
+
     private void createDatabase(Runnable action) {
         if (!CLASS_DATABASE_STATES.get(testClass).created) {
             synchronized (CLASS_DATABASE_STATES) {
@@ -110,11 +119,6 @@ class PerClassStrategy extends DatabaseStateStrategy {
                 }
             }
         }
-    }
-
-    @Override
-    DataSource getDataSource() {
-        return database.dataSourceForDatabase(databaseName);
     }
 }
 
@@ -143,15 +147,15 @@ class PerExecutionStrategy extends DatabaseStateStrategy {
         }
     }
 
+    @Override
+    protected String getDatabaseName() {
+        return DATABASE_NAME;
+    }
+
     private static synchronized void createDatabase(Runnable action) {
         if (!databaseCreated) {
             action.run();
             databaseCreated = true;
         }
-    }
-
-    @Override
-    DataSource getDataSource() {
-        return database.dataSourceForDatabase(DATABASE_NAME);
     }
 }

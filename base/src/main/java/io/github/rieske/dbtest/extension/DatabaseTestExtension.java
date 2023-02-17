@@ -31,34 +31,42 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
          */
         DATABASE_PER_EXECUTION;
 
-        private DatabaseStateStrategy toStrategy(TestDatabase database, Consumer<DataSource> migrator, boolean migrateOnce) {
+        private String ensureDatabaseCreated(TestDatabase database, Consumer<String> databaseCreator, Class<?> testClass) {
             switch (this) {
                 case DATABASE_PER_TEST_METHOD:
-                    return new PerMethodStrategy(database, migrator, migrateOnce);
+                    return database.perMethod.ensureDatabaseCreated(testClass, databaseCreator);
                 case DATABASE_PER_TEST_CLASS:
-                    return new PerClassStrategy(database, migrator, migrateOnce);
+                    return database.perClass.ensureDatabaseCreated(testClass, databaseCreator);
                 case DATABASE_PER_EXECUTION:
-                    return new PerExecutionStrategy(database, migrator, migrateOnce);
+                    return database.perExecution.ensureDatabaseCreated(testClass, databaseCreator);
                 default:
                     throw new IllegalStateException("No strategy exists for " + this + " mode");
             }
         }
     }
 
-    private final DatabaseStateStrategy stateStrategy;
+    private final TestDatabase database;
+    private final Consumer<String> databaseCreator;
+    private final Mode mode;
+
+    private String databaseName;
 
     DatabaseTestExtension(TestDatabase database, Mode mode, boolean migrateOnce) {
-        this.stateStrategy = mode.toStrategy(database, this::migrateDatabase, migrateOnce);
+        this.database = database;
+        this.databaseCreator = makeDatabaseCreator(database, migrateOnce);
+        this.mode = mode;
     }
 
     @Override
     public void beforeEach(ExtensionContext context) {
-        stateStrategy.beforeTest(context.getRequiredTestClass());
+        this.databaseName = mode.ensureDatabaseCreated(database, databaseCreator, context.getRequiredTestClass());
     }
 
     @Override
     public void afterEach(ExtensionContext context) {
-        stateStrategy.afterTest();
+        if (mode == Mode.DATABASE_PER_TEST_METHOD) {
+            database.dropDatabase(databaseName);
+        }
     }
 
     /**
@@ -68,7 +76,7 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
      * @return dataSource for a migrated database
      */
     public DataSource getDataSource() {
-        return stateStrategy.getDataSource();
+        return database.dataSourceForDatabase(databaseName);
     }
 
     /**
@@ -78,4 +86,18 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
      * @param dataSource to use with database migration tool of your choice
      */
     abstract protected void migrateDatabase(DataSource dataSource);
+
+    private Consumer<String> makeDatabaseCreator(TestDatabase database, boolean migrateOnce) {
+        if (migrateOnce) {
+            return databaseName -> {
+                database.ensureTemplateDatabaseMigrated(this::migrateDatabase);
+                database.cloneTemplateDatabaseTo(databaseName);
+            };
+        } else {
+            return databaseName -> {
+                database.createDatabase(databaseName);
+                migrateDatabase(database.dataSourceForDatabase(databaseName));
+            };
+        }
+    }
 }

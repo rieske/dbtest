@@ -6,18 +6,20 @@ import java.sql.SQLException;
 import java.util.function.Consumer;
 
 abstract class TestDatabase {
+    final DatabaseState perMethod = new PerMethod();
+    final DatabaseState perClass = new PerClass();
+    final DatabaseState perExecution = new PerExecution();
+
     private volatile boolean templateDatabaseMigrated = false;
 
-    void migrateTemplateDatabase(Consumer<DataSource> migrator) {
-        if (templateDatabaseMigrated) {
-            return;
-        }
-        synchronized (this) {
-            if (templateDatabaseMigrated) {
-                return;
+    void ensureTemplateDatabaseMigrated(Consumer<DataSource> migrator) {
+        if (!templateDatabaseMigrated) {
+            synchronized (this) {
+                if (!templateDatabaseMigrated) {
+                    migrateTemplateDatabase(migrator, dataSourceForDatabase(getTemplateDatabaseName()));
+                    templateDatabaseMigrated = true;
+                }
             }
-            migrateTemplateDatabase(migrator, dataSourceForDatabase(getTemplateDatabaseName()));
-            templateDatabaseMigrated = true;
         }
     }
 

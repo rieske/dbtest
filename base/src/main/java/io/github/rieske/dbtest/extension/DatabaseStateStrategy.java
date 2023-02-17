@@ -28,8 +28,39 @@ abstract class DatabaseStateStrategy {
     protected static String newDatabaseName() {
         return "testdb_" + UUID.randomUUID().toString().replace('-', '_');
     }
+}
 
-    static class DatabaseState {
+class PerMethodStrategy extends DatabaseStateStrategy {
+    private final String databaseName = newDatabaseName();
+
+    PerMethodStrategy(TestDatabase database) {
+        super(database);
+    }
+
+    @Override
+    protected void afterTest() {
+        database.dropDatabase(databaseName);
+    }
+
+    @Override
+    void cloneTemplateDatabaseToTestDatabase() {
+        database.cloneTemplateDatabaseTo(databaseName);
+    }
+
+    @Override
+    void createAndMigrateDatabase(Consumer<DataSource> migrator) {
+        database.createDatabase(databaseName);
+        migrator.accept(getDataSource());
+    }
+
+    @Override
+    DataSource getDataSource() {
+        return database.dataSourceForDatabase(databaseName);
+    }
+}
+
+class PerClassStrategy extends DatabaseStateStrategy {
+    private static class DatabaseState {
         final Class<?> key;
         final String name;
         final boolean created;
@@ -44,43 +75,7 @@ abstract class DatabaseStateStrategy {
             return new DatabaseState(key, newDatabaseName(), false);
         }
     }
-}
 
-class PerMethodStrategy extends DatabaseStateStrategy {
-    private DatabaseState databaseState;
-
-    PerMethodStrategy(TestDatabase database) {
-        super(database);
-    }
-
-    @Override
-    protected void beforeTest(Class<?> testClass) {
-        this.databaseState = DatabaseState.create(null);
-    }
-
-    @Override
-    protected void afterTest() {
-        database.dropDatabase(databaseState.name);
-    }
-
-    @Override
-    void cloneTemplateDatabaseToTestDatabase() {
-        database.cloneTemplateDatabaseTo(databaseState.name);
-    }
-
-    @Override
-    void createAndMigrateDatabase(Consumer<DataSource> migrator) {
-        database.createDatabase(databaseState.name);
-        migrator.accept(getDataSource());
-    }
-
-    @Override
-    DataSource getDataSource() {
-        return database.dataSourceForDatabase(databaseState.name);
-    }
-}
-
-class PerClassStrategy extends DatabaseStateStrategy {
     private static final Map<Class<?>, DatabaseState> CLASS_DATABASE_STATES = new ConcurrentHashMap<>();
     private volatile DatabaseState databaseState;
 
@@ -165,4 +160,3 @@ class PerExecutionStrategy extends DatabaseStateStrategy {
         return database.dataSourceForDatabase(DATABASE_NAME);
     }
 }
-

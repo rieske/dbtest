@@ -10,7 +10,7 @@ public abstract class PostgreSQLFastTestExtension extends PostgreSQLTestExtensio
      *
      * @param databaseVersion the database version to use.
      *                        Must be a valid docker image tag from the official <a href="https://hub.docker.com/_/postgres/tags">PostgreSQL Docker image</a>.
-     * @param mode the data retention mode to use for this extension
+     * @param mode            the data retention mode to use for this extension
      */
     public PostgreSQLFastTestExtension(String databaseVersion, Mode mode) {
         super(databaseVersion, mode);

@@ -10,7 +10,7 @@ public abstract class MySQLFastTestExtension extends MySQLTestExtension {
      *
      * @param databaseVersion the database version to use.
      *                        Must be a valid docker image tag from the official <a href="https://hub.docker.com/_/mysql/tags">MySQL Docker image</a>.
-     * @param mode the data retention mode to use for this extension
+     * @param mode            the data retention mode to use for this extension
      */
     public MySQLFastTestExtension(String databaseVersion, Mode mode) {
         super(databaseVersion, mode);

@@ -54,7 +54,6 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
     @Override
     public void beforeEach(ExtensionContext context) {
         stateStrategy.beforeTest(context.getRequiredTestClass());
-        stateStrategy.prepareTestDatabase();
     }
 
     @Override

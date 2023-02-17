@@ -25,10 +25,7 @@ abstract class DatabaseStateStrategy {
         }
     }
 
-    protected abstract void prepareTestDatabase();
-
-    protected void beforeTest(Class<?> testClass) {
-    }
+    protected abstract void beforeTest(Class<?> testClass);
 
     protected void afterTest() {
     }
@@ -52,7 +49,7 @@ class PerMethodStrategy extends DatabaseStateStrategy {
     }
 
     @Override
-    protected void prepareTestDatabase() {
+    protected void beforeTest(Class<?> testClass) {
         databaseCreator.run();
     }
 
@@ -69,7 +66,6 @@ class PerMethodStrategy extends DatabaseStateStrategy {
 
 class PerClassStrategy extends DatabaseStateStrategy {
     private static final Map<Class<?>, String> CLASS_DATABASES = new ConcurrentHashMap<>();
-    private Class<?> testClass;
     private String databaseName;
 
     PerClassStrategy(TestDatabase database, Consumer<DataSource> migrator, boolean migrateOnce) {
@@ -77,7 +73,7 @@ class PerClassStrategy extends DatabaseStateStrategy {
     }
 
     @Override
-    protected void prepareTestDatabase() {
+    protected void beforeTest(Class<?> testClass) {
         databaseName = CLASS_DATABASES.get(testClass);
         if (databaseName == null) {
             synchronized (CLASS_DATABASES) {
@@ -89,11 +85,6 @@ class PerClassStrategy extends DatabaseStateStrategy {
                 }
             }
         }
-    }
-
-    @Override
-    protected void beforeTest(Class<?> testClass) {
-        this.testClass = testClass;
     }
 
     @Override
@@ -111,7 +102,7 @@ class PerExecutionStrategy extends DatabaseStateStrategy {
     }
 
     @Override
-    protected void prepareTestDatabase() {
+    protected void beforeTest(Class<?> testClass) {
         if (!databaseCreated) {
             synchronized (DATABASE_NAME) {
                 if (!databaseCreated) {

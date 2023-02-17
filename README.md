@@ -1,5 +1,6 @@
 # Fast Database Tests
 
+![Maven Central](https://img.shields.io/maven-central/v/io.github.rieske.dbtest/postgresql)
 [![Actions Status](https://github.com/rieske/java-fast-database-tests/workflows/main/badge.svg)](https://github.com/rieske/java-fast-database-tests/actions)
 
 Demonstrates how you can greatly speed up your integration tests against a containerized database.
@@ -17,6 +18,10 @@ Applying all the migrations before every single test is where we can optimize.
 
 ## Postgres
 
+```
+io.github.rieske.dbtest:postgresql
+```
+
 Postgres container from testcontainers library by default disables `fsync` which provides similar speed
 boost as tmpfs by not flushing the changes to disk and keeping everything in memory.
 Still, my experiments show that both `fsync off` and `tmpfs` speed things up even a tiny bit more.
@@ -27,6 +32,10 @@ We can then use this database as a [template](https://www.postgresql.org/docs/cu
 to cheaply copy the fresh state to a new database for each test.
 
 ## MySql
+
+```
+io.github.rieske.dbtest:mysql
+```
 
 MySql does not have built in way to copy a database from a template like Postgres.
 We can work around this by applying the migrations to a database once,

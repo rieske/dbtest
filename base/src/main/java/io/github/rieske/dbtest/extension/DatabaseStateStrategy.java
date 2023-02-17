@@ -68,21 +68,7 @@ class PerMethodStrategy extends DatabaseStateStrategy {
 }
 
 class PerClassStrategy extends DatabaseStateStrategy {
-    private static class DatabaseState {
-        final String name;
-        final boolean created;
-
-        DatabaseState(String name, boolean created) {
-            this.name = name;
-            this.created = created;
-        }
-
-        static DatabaseState create() {
-            return new DatabaseState(newDatabaseName(), false);
-        }
-    }
-
-    private static final Map<Class<?>, DatabaseState> CLASS_DATABASE_STATES = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, String> CLASS_DATABASES = new ConcurrentHashMap<>();
     private Class<?> testClass;
     private String databaseName;
 
@@ -92,11 +78,14 @@ class PerClassStrategy extends DatabaseStateStrategy {
 
     @Override
     protected void prepareTestDatabase() {
-        if (!CLASS_DATABASE_STATES.get(testClass).created) {
-            synchronized (CLASS_DATABASE_STATES) {
-                if (!CLASS_DATABASE_STATES.get(testClass).created) {
+        databaseName = CLASS_DATABASES.get(testClass);
+        if (databaseName == null) {
+            synchronized (CLASS_DATABASES) {
+                databaseName = CLASS_DATABASES.get(testClass);
+                if (databaseName == null) {
+                    databaseName = newDatabaseName();
                     databaseCreator.run();
-                    CLASS_DATABASE_STATES.put(testClass, new DatabaseState(databaseName, true));
+                    CLASS_DATABASES.put(testClass, databaseName);
                 }
             }
         }
@@ -105,7 +94,6 @@ class PerClassStrategy extends DatabaseStateStrategy {
     @Override
     protected void beforeTest(Class<?> testClass) {
         this.testClass = testClass;
-        this.databaseName = CLASS_DATABASE_STATES.computeIfAbsent(testClass, k -> DatabaseState.create()).name;
     }
 
     @Override

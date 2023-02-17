@@ -61,23 +61,22 @@ class PerMethodStrategy extends DatabaseStateStrategy {
 
 class PerClassStrategy extends DatabaseStateStrategy {
     private static class DatabaseState {
-        final Class<?> key;
         final String name;
         final boolean created;
 
-        DatabaseState(Class<?> key, String name, boolean created) {
-            this.key = key;
+        DatabaseState(String name, boolean created) {
             this.name = name;
             this.created = created;
         }
 
-        static DatabaseState create(Class<?> key) {
-            return new DatabaseState(key, newDatabaseName(), false);
+        static DatabaseState create() {
+            return new DatabaseState(newDatabaseName(), false);
         }
     }
 
     private static final Map<Class<?>, DatabaseState> CLASS_DATABASE_STATES = new ConcurrentHashMap<>();
-    private volatile DatabaseState databaseState;
+    private Class<?> testClass;
+    private String databaseName;
 
     PerClassStrategy(TestDatabase database) {
         super(database);
@@ -85,41 +84,37 @@ class PerClassStrategy extends DatabaseStateStrategy {
 
     @Override
     protected void beforeTest(Class<?> testClass) {
-        this.databaseState = CLASS_DATABASE_STATES.computeIfAbsent(testClass, DatabaseState::create);
+        this.testClass = testClass;
+        this.databaseName = CLASS_DATABASE_STATES.computeIfAbsent(testClass, k -> DatabaseState.create()).name;
     }
 
     @Override
     void cloneTemplateDatabaseToTestDatabase() {
-        if (!CLASS_DATABASE_STATES.get(databaseState.key).created) {
-            synchronized (CLASS_DATABASE_STATES) {
-                if (CLASS_DATABASE_STATES.get(databaseState.key).created) {
-                    return;
-                }
-                database.cloneTemplateDatabaseTo(databaseState.name);
-                this.databaseState = new DatabaseState(databaseState.key, databaseState.name, true);
-                CLASS_DATABASE_STATES.put(databaseState.key, this.databaseState);
-            }
-        }
+        createDatabase(() -> database.cloneTemplateDatabaseTo(databaseName));
     }
 
     @Override
     void createAndMigrateDatabase(Consumer<DataSource> migrator) {
-        if (!CLASS_DATABASE_STATES.get(databaseState.key).created) {
+        createDatabase(() -> {
+            database.createDatabase(databaseName);
+            migrator.accept(getDataSource());
+        });
+    }
+
+    private void createDatabase(Runnable action) {
+        if (!CLASS_DATABASE_STATES.get(testClass).created) {
             synchronized (CLASS_DATABASE_STATES) {
-                if (CLASS_DATABASE_STATES.get(databaseState.key).created) {
-                    return;
+                if (!CLASS_DATABASE_STATES.get(testClass).created) {
+                    action.run();
+                    CLASS_DATABASE_STATES.put(testClass, new DatabaseState(databaseName, true));
                 }
-                database.createDatabase(databaseState.name);
-                migrator.accept(getDataSource());
-                this.databaseState = new DatabaseState(databaseState.key, databaseState.name, true);
-                CLASS_DATABASE_STATES.put(databaseState.key, this.databaseState);
             }
         }
     }
 
     @Override
     DataSource getDataSource() {
-        return database.dataSourceForDatabase(databaseState.name);
+        return database.dataSourceForDatabase(databaseName);
     }
 }
 

@@ -13,15 +13,37 @@ abstract class DatabaseStateStrategy {
         this.database = database;
     }
 
-    abstract void beforeTest(Class<?> testClass);
+    protected void beforeTest(Class<?> testClass) {
+    }
 
-    abstract void afterTest();
+    protected void afterTest() {
+    }
 
     abstract void cloneTemplateDatabaseToTestDatabase();
 
     abstract void createAndMigrateDatabase(Consumer<DataSource> migrator);
 
     abstract DataSource getDataSource();
+
+    protected static String newDatabaseName() {
+        return "testdb_" + UUID.randomUUID().toString().replace('-', '_');
+    }
+
+    static class DatabaseState {
+        final Class<?> key;
+        final String name;
+        final boolean created;
+
+        DatabaseState(Class<?> key, String name, boolean created) {
+            this.key = key;
+            this.name = name;
+            this.created = created;
+        }
+
+        static DatabaseState create(Class<?> key) {
+            return new DatabaseState(key, newDatabaseName(), false);
+        }
+    }
 }
 
 class PerMethodStrategy extends DatabaseStateStrategy {
@@ -32,12 +54,12 @@ class PerMethodStrategy extends DatabaseStateStrategy {
     }
 
     @Override
-    void beforeTest(Class<?> testClass) {
+    protected void beforeTest(Class<?> testClass) {
         this.databaseState = DatabaseState.create(null);
     }
 
     @Override
-    void afterTest() {
+    protected void afterTest() {
         database.dropDatabase(databaseState.name);
     }
 
@@ -67,12 +89,8 @@ class PerClassStrategy extends DatabaseStateStrategy {
     }
 
     @Override
-    void beforeTest(Class<?> testClass) {
+    protected void beforeTest(Class<?> testClass) {
         this.databaseState = CLASS_DATABASE_STATES.computeIfAbsent(testClass, DatabaseState::create);
-    }
-
-    @Override
-    void afterTest() {
     }
 
     @Override
@@ -111,65 +129,40 @@ class PerClassStrategy extends DatabaseStateStrategy {
 }
 
 class PerExecutionStrategy extends DatabaseStateStrategy {
-    private static volatile DatabaseState EXECUTION_DATABASE_STATE = DatabaseState.create(null);
+    private static final String DATABASE_NAME = newDatabaseName();
+    private static volatile boolean databaseCreated = false;
 
     PerExecutionStrategy(TestDatabase database) {
         super(database);
     }
 
     @Override
-    void beforeTest(Class<?> testClass) {
-    }
-
-    @Override
-    void afterTest() {
-    }
-
-    @Override
     void cloneTemplateDatabaseToTestDatabase() {
-        if (!EXECUTION_DATABASE_STATE.created) {
-            synchronized (DatabaseTestExtension.class) {
-                if (EXECUTION_DATABASE_STATE.created) {
-                    return;
-                }
-                database.cloneTemplateDatabaseTo(EXECUTION_DATABASE_STATE.name);
-                EXECUTION_DATABASE_STATE = new DatabaseState(null, EXECUTION_DATABASE_STATE.name, true);
-            }
+        if (!databaseCreated) {
+            createDatabase(() -> database.cloneTemplateDatabaseTo(DATABASE_NAME));
         }
     }
 
     @Override
     void createAndMigrateDatabase(Consumer<DataSource> migrator) {
-        if (!EXECUTION_DATABASE_STATE.created) {
-            synchronized (DatabaseTestExtension.class) {
-                if (EXECUTION_DATABASE_STATE.created) {
-                    return;
-                }
-                database.createDatabase(EXECUTION_DATABASE_STATE.name);
+        if (!databaseCreated) {
+            createDatabase(() -> {
+                database.createDatabase(DATABASE_NAME);
                 migrator.accept(getDataSource());
-                EXECUTION_DATABASE_STATE = new DatabaseState(null, EXECUTION_DATABASE_STATE.name, true);
-            }
+            });
+        }
+    }
+
+    private static synchronized void createDatabase(Runnable action) {
+        if (!databaseCreated) {
+            action.run();
+            databaseCreated = true;
         }
     }
 
     @Override
     DataSource getDataSource() {
-        return database.dataSourceForDatabase(EXECUTION_DATABASE_STATE.name);
+        return database.dataSourceForDatabase(DATABASE_NAME);
     }
 }
 
-class DatabaseState {
-    final Class<?> key;
-    final String name;
-    final boolean created;
-
-    DatabaseState(Class<?> key, String name, boolean created) {
-        this.key = key;
-        this.name = name;
-        this.created = created;
-    }
-
-    static DatabaseState create(Class<?> key) {
-        return new DatabaseState(key, "testdb_" + UUID.randomUUID().toString().replace('-', '_'), false);
-    }
-}

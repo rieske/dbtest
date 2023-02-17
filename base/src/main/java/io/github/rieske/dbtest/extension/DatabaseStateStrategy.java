@@ -112,18 +112,18 @@ class PerExecutionStrategy extends DatabaseStateStrategy {
 
     @Override
     protected void prepareTestDatabase() {
-        createDatabase(databaseCreator);
+        if (!databaseCreated) {
+            synchronized (DATABASE_NAME) {
+                if (!databaseCreated) {
+                    databaseCreator.run();
+                    databaseCreated = true;
+                }
+            }
+        }
     }
 
     @Override
     protected String getDatabaseName() {
         return DATABASE_NAME;
-    }
-
-    private static synchronized void createDatabase(Runnable action) {
-        if (!databaseCreated) {
-            action.run();
-            databaseCreated = true;
-        }
     }
 }

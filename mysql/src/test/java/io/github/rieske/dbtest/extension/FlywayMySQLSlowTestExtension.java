@@ -6,8 +6,8 @@ import javax.sql.DataSource;
 
 public class FlywayMySQLSlowTestExtension extends MySQLSlowTestExtension {
 
-    public FlywayMySQLSlowTestExtension(String databaseVersion) {
-        super(databaseVersion);
+    public FlywayMySQLSlowTestExtension(String databaseVersion, Mode mode) {
+        super(databaseVersion, mode);
     }
 
     @Override

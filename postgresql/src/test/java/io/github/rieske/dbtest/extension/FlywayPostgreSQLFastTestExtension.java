@@ -5,8 +5,8 @@ import io.github.rieske.dbtest.FlywayMigrator;
 import javax.sql.DataSource;
 
 public class FlywayPostgreSQLFastTestExtension extends PostgreSQLFastTestExtension {
-    public FlywayPostgreSQLFastTestExtension(String databaseVersion) {
-        super(databaseVersion);
+    public FlywayPostgreSQLFastTestExtension(String databaseVersion, Mode mode) {
+        super(databaseVersion, mode);
     }
 
     @Override

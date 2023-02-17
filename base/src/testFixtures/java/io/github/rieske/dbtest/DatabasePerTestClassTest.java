@@ -1,53 +1,27 @@
 package io.github.rieske.dbtest;
 
 import io.github.rieske.dbtest.extension.DatabaseTestExtension;
-import org.junit.jupiter.api.ClassOrderer;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestClassOrder;
 import org.junit.jupiter.api.TestMethodOrder;
 
-import java.util.function.Function;
-
 public abstract class DatabasePerTestClassTest {
-    private final String databaseVersion;
-    private final Function<String, DatabaseTestExtension> slowExtensionProvider;
-    private final Function<String, DatabaseTestExtension> fastExtensionProvider;
+    private final DatabaseTestExtension slowExtension;
+    private final DatabaseTestExtension fastExtension;
 
-    public DatabasePerTestClassTest(
-            String databaseVersion,
-            Function<String, DatabaseTestExtension> slowExtensionProvider,
-            Function<String, DatabaseTestExtension> fastExtensionProvider
-    ) {
-        this.databaseVersion = databaseVersion;
-        this.slowExtensionProvider = slowExtensionProvider;
-        this.fastExtensionProvider = fastExtensionProvider;
+    public DatabasePerTestClassTest(DatabaseTestExtension slowExtension, DatabaseTestExtension fastExtension) {
+        this.slowExtension = slowExtension;
+        this.fastExtension = fastExtension;
     }
 
     @Nested
-    class SlowTest extends TestTemplate {
+    class SlowTest extends DatabaseTest {
         SlowTest() {
-            super(slowExtensionProvider.apply(databaseVersion));
-        }
-    }
-
-    @Nested
-    class FastTest extends TestTemplate {
-        FastTest() {
-            super(fastExtensionProvider.apply(databaseVersion));
-        }
-    }
-
-    @TestClassOrder(ClassOrderer.OrderAnnotation.class)
-    abstract static class TestTemplate extends DatabaseTest {
-
-        TestTemplate(DatabaseTestExtension database) {
-            super(database);
+            super(slowExtension);
         }
 
-        @Order(0)
         @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
         @Nested
         class FirstTestClass {
@@ -66,7 +40,49 @@ public abstract class DatabasePerTestClassTest {
             }
         }
 
-        @Order(1)
+        @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+        @Nested
+        class SecondTestClass {
+            @Order(0)
+            @Test
+            void createState() {
+                assertRecordCount(0);
+                insertRandomRecord();
+                assertRecordCount(1);
+            }
+
+            @Order(1)
+            @Test
+            void ensureState() {
+                assertRecordCount(1);
+            }
+        }
+    }
+
+    @Nested
+    class FastTest extends DatabaseTest {
+        FastTest() {
+            super(fastExtension);
+        }
+
+        @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+        @Nested
+        class FirstTestClass {
+            @Order(0)
+            @Test
+            void createState() {
+                assertRecordCount(0);
+                insertRandomRecord();
+                assertRecordCount(1);
+            }
+
+            @Order(1)
+            @Test
+            void ensureState() {
+                assertRecordCount(1);
+            }
+        }
+
         @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
         @Nested
         class SecondTestClass {

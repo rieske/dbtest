@@ -8,40 +8,40 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestClassOrder;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
-import java.util.function.Function;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public abstract class DatabasePerExecutionTest {
-    private final String databaseVersion;
-    private final Function<String, DatabaseTestExtension> slowExtensionProvider;
-    private final Function<String, DatabaseTestExtension> fastExtensionProvider;
+    private final DatabaseTestExtension slowExtension;
+    private final DatabaseTestExtension fastExtension;
 
-    public DatabasePerExecutionTest(
-            String databaseVersion,
-            Function<String, DatabaseTestExtension> slowExtensionProvider,
-            Function<String, DatabaseTestExtension> fastExtensionProvider
-    ) {
-        this.databaseVersion = databaseVersion;
-        this.slowExtensionProvider = slowExtensionProvider;
-        this.fastExtensionProvider = fastExtensionProvider;
+    public DatabasePerExecutionTest(DatabaseTestExtension slowExtension, DatabaseTestExtension fastExtension) {
+        this.slowExtension = slowExtension;
+        this.fastExtension = fastExtension;
     }
 
     @Nested
     class SlowTest extends TestTemplate {
         SlowTest() {
-            super(slowExtensionProvider.apply(databaseVersion));
+            super(slowExtension);
         }
     }
 
     @Nested
     class FastTest extends TestTemplate {
         FastTest() {
-            super(fastExtensionProvider.apply(databaseVersion));
+            super(fastExtension);
         }
     }
 
+    @Execution(ExecutionMode.SAME_THREAD)
     @TestClassOrder(ClassOrderer.OrderAnnotation.class)
-    abstract static class TestTemplate extends DatabaseTest {
+    private abstract static class TestTemplate extends DatabaseTest {
+        private static final AtomicInteger currentRecordCount = new AtomicInteger(0);
 
         TestTemplate(DatabaseTestExtension database) {
             super(database);
@@ -51,37 +51,48 @@ public abstract class DatabasePerExecutionTest {
         @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
         @Nested
         class FirstTestClass {
-            @Order(0)
-            @Test
-            void createState() {
-                assertRecordCount(0);
-                insertRandomRecord();
-                assertRecordCount(1);
-            }
 
             @Order(1)
             @Test
+            void createState() {
+                currentRecordCount.set(getRecordCount());
+                insertRandomRecord();
+                int expectedRecordCount = currentRecordCount.incrementAndGet();
+                int recordCount = getRecordCount();
+                assertThat(recordCount).isGreaterThanOrEqualTo(expectedRecordCount);
+            }
+
+            @Order(2)
+            @Test
             void ensureState() {
-                assertRecordCount(1);
+                int recordCount = getRecordCount();
+                assertThat(recordCount).isGreaterThan(0);
+                assertThat(recordCount).isGreaterThanOrEqualTo(currentRecordCount.get());
             }
         }
 
-        @Order(1)
+        @Order(3)
         @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
         @Nested
         class SecondTestClass {
-            @Order(0)
+            @Order(4)
             @Test
             void createState() {
-                assertRecordCount(1);
+                int recordCount = getRecordCount();
+                assertThat(recordCount).isGreaterThan(0);
+                assertThat(recordCount).isGreaterThanOrEqualTo(currentRecordCount.get());
                 insertRandomRecord();
-                assertRecordCount(2);
+                int expectedRecordCount = currentRecordCount.incrementAndGet();
+                recordCount = getRecordCount();
+                assertThat(recordCount).isGreaterThanOrEqualTo(expectedRecordCount);
             }
 
-            @Order(1)
+            @Order(5)
             @Test
             void ensureState() {
-                assertRecordCount(2);
+                int recordCount = getRecordCount();
+                assertThat(recordCount).isGreaterThan(1);
+                assertThat(recordCount).isGreaterThanOrEqualTo(currentRecordCount.get());
             }
         }
     }

@@ -5,36 +5,29 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
 
 import java.util.UUID;
-import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public abstract class PerformanceTests {
-    private final String databaseVersion;
-    private final Function<String, DatabaseTestExtension> slowExtensionProvider;
-    private final Function<String, DatabaseTestExtension> fastExtensionProvider;
+    private final DatabaseTestExtension slowExtension;
+    private final DatabaseTestExtension fastExtension;
 
-    public PerformanceTests(
-            String databaseVersion,
-            Function<String, DatabaseTestExtension> slowExtensionProvider,
-            Function<String, DatabaseTestExtension> fastExtensionProvider
-    ) {
-        this.databaseVersion = databaseVersion;
-        this.slowExtensionProvider = slowExtensionProvider;
-        this.fastExtensionProvider = fastExtensionProvider;
+    public PerformanceTests(DatabaseTestExtension slowExtension, DatabaseTestExtension fastExtension) {
+        this.slowExtension = slowExtension;
+        this.fastExtension = fastExtension;
     }
 
     @Nested
     class SlowTests extends TestTemplate {
         SlowTests() {
-            super(slowExtensionProvider.apply(databaseVersion));
+            super(slowExtension);
         }
     }
 
     @Nested
     class FastTests extends TestTemplate {
         FastTests() {
-            super(fastExtensionProvider.apply(databaseVersion));
+            super(fastExtension);
         }
     }
 
@@ -55,9 +48,10 @@ public abstract class PerformanceTests {
             String foo = UUID.randomUUID().toString();
             executeUpdateSql("INSERT INTO some_table(id, foo) VALUES('" + id + "', '" + foo + "')");
 
-            assertRecordCount(1);
+            int recordCount = getRecordCount();
+            assertThat(recordCount).isGreaterThanOrEqualTo(1);
 
-            executeQuerySql("SELECT * FROM some_table", rs -> {
+            executeQuerySql("SELECT * FROM some_table WHERE id='" + id + "'", rs -> {
                 assertThat(rs.next()).isTrue();
                 assertThat(UUID.fromString(rs.getString(1))).isEqualTo(id);
                 assertThat(rs.getString(2)).isEqualTo(foo);

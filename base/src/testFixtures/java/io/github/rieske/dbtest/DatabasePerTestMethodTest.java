@@ -7,34 +7,26 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
-import java.util.function.Function;
-
 public abstract class DatabasePerTestMethodTest {
-    private final String databaseVersion;
-    private final Function<String, DatabaseTestExtension> slowExtensionProvider;
-    private final Function<String, DatabaseTestExtension> fastExtensionProvider;
+    private final DatabaseTestExtension slowExtension;
+    private final DatabaseTestExtension fastExtension;
 
-    public DatabasePerTestMethodTest(
-            String databaseVersion,
-            Function<String, DatabaseTestExtension> slowExtensionProvider,
-            Function<String, DatabaseTestExtension> fastExtensionProvider
-    ) {
-        this.databaseVersion = databaseVersion;
-        this.slowExtensionProvider = slowExtensionProvider;
-        this.fastExtensionProvider = fastExtensionProvider;
+    public DatabasePerTestMethodTest(DatabaseTestExtension slowExtension, DatabaseTestExtension fastExtension) {
+        this.slowExtension = slowExtension;
+        this.fastExtension = fastExtension;
     }
 
     @Nested
     class SlowTest extends TestTemplate {
         SlowTest() {
-            super(slowExtensionProvider.apply(databaseVersion));
+            super(slowExtension);
         }
     }
 
     @Nested
     class FastTest extends TestTemplate {
         FastTest() {
-            super(fastExtensionProvider.apply(databaseVersion));
+            super(fastExtension);
         }
     }
 

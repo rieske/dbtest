@@ -13,12 +13,6 @@ public abstract class PostgreSQLFastTestExtension extends PostgreSQLTestExtensio
      * @param mode            the data retention mode to use for this extension
      */
     public PostgreSQLFastTestExtension(String databaseVersion, Mode mode) {
-        super(databaseVersion, mode);
-        migrateTemplateDatabase();
-    }
-
-    @Override
-    void createFreshMigratedDatabase() {
-        cloneTemplateDatabaseToTestDatabase();
+        super(databaseVersion, mode, true);
     }
 }

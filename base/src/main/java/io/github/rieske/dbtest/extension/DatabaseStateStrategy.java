@@ -8,20 +8,30 @@ import java.util.function.Consumer;
 
 abstract class DatabaseStateStrategy {
     protected final TestDatabase database;
+    protected final Consumer<DataSource> migrator;
+    protected final Runnable databaseCreator;
 
-    DatabaseStateStrategy(TestDatabase database) {
+    DatabaseStateStrategy(TestDatabase database, Consumer<DataSource> migrator, boolean migrateOnce) {
         this.database = database;
+        this.migrator = migrator;
+        if (migrateOnce) {
+            this.databaseCreator = () -> database.cloneTemplateDatabaseTo(getDatabaseName());
+            database.migrateTemplateDatabase(migrator);
+        } else {
+            this.databaseCreator = () -> {
+                database.createDatabase(getDatabaseName());
+                migrator.accept(getDataSource());
+            };
+        }
     }
+
+    protected abstract void prepareTestDatabase();
 
     protected void beforeTest(Class<?> testClass) {
     }
 
     protected void afterTest() {
     }
-
-    abstract void cloneTemplateDatabaseToTestDatabase();
-
-    abstract void createAndMigrateDatabase(Consumer<DataSource> migrator);
 
     protected abstract String getDatabaseName();
 
@@ -37,24 +47,18 @@ abstract class DatabaseStateStrategy {
 class PerMethodStrategy extends DatabaseStateStrategy {
     private final String databaseName = newDatabaseName();
 
-    PerMethodStrategy(TestDatabase database) {
-        super(database);
+    PerMethodStrategy(TestDatabase database, Consumer<DataSource> migrator, boolean migrateOnce) {
+        super(database, migrator, migrateOnce);
+    }
+
+    @Override
+    protected void prepareTestDatabase() {
+        databaseCreator.run();
     }
 
     @Override
     protected void afterTest() {
         database.dropDatabase(databaseName);
-    }
-
-    @Override
-    void cloneTemplateDatabaseToTestDatabase() {
-        database.cloneTemplateDatabaseTo(databaseName);
-    }
-
-    @Override
-    void createAndMigrateDatabase(Consumer<DataSource> migrator) {
-        database.createDatabase(databaseName);
-        migrator.accept(getDataSource());
     }
 
     @Override
@@ -82,8 +86,20 @@ class PerClassStrategy extends DatabaseStateStrategy {
     private Class<?> testClass;
     private String databaseName;
 
-    PerClassStrategy(TestDatabase database) {
-        super(database);
+    PerClassStrategy(TestDatabase database, Consumer<DataSource> migrator, boolean migrateOnce) {
+        super(database, migrator, migrateOnce);
+    }
+
+    @Override
+    protected void prepareTestDatabase() {
+        if (!CLASS_DATABASE_STATES.get(testClass).created) {
+            synchronized (CLASS_DATABASE_STATES) {
+                if (!CLASS_DATABASE_STATES.get(testClass).created) {
+                    databaseCreator.run();
+                    CLASS_DATABASE_STATES.put(testClass, new DatabaseState(databaseName, true));
+                }
+            }
+        }
     }
 
     @Override
@@ -93,32 +109,8 @@ class PerClassStrategy extends DatabaseStateStrategy {
     }
 
     @Override
-    void cloneTemplateDatabaseToTestDatabase() {
-        createDatabase(() -> database.cloneTemplateDatabaseTo(databaseName));
-    }
-
-    @Override
-    void createAndMigrateDatabase(Consumer<DataSource> migrator) {
-        createDatabase(() -> {
-            database.createDatabase(databaseName);
-            migrator.accept(getDataSource());
-        });
-    }
-
-    @Override
     protected String getDatabaseName() {
         return databaseName;
-    }
-
-    private void createDatabase(Runnable action) {
-        if (!CLASS_DATABASE_STATES.get(testClass).created) {
-            synchronized (CLASS_DATABASE_STATES) {
-                if (!CLASS_DATABASE_STATES.get(testClass).created) {
-                    action.run();
-                    CLASS_DATABASE_STATES.put(testClass, new DatabaseState(databaseName, true));
-                }
-            }
-        }
     }
 }
 
@@ -126,25 +118,13 @@ class PerExecutionStrategy extends DatabaseStateStrategy {
     private static final String DATABASE_NAME = newDatabaseName();
     private static volatile boolean databaseCreated = false;
 
-    PerExecutionStrategy(TestDatabase database) {
-        super(database);
+    PerExecutionStrategy(TestDatabase database, Consumer<DataSource> migrator, boolean migrateOnce) {
+        super(database, migrator, migrateOnce);
     }
 
     @Override
-    void cloneTemplateDatabaseToTestDatabase() {
-        if (!databaseCreated) {
-            createDatabase(() -> database.cloneTemplateDatabaseTo(DATABASE_NAME));
-        }
-    }
-
-    @Override
-    void createAndMigrateDatabase(Consumer<DataSource> migrator) {
-        if (!databaseCreated) {
-            createDatabase(() -> {
-                database.createDatabase(DATABASE_NAME);
-                migrator.accept(getDataSource());
-            });
-        }
+    protected void prepareTestDatabase() {
+        createDatabase(databaseCreator);
     }
 
     @Override

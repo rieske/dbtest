@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import javax.sql.DataSource;
+import java.util.function.Consumer;
 
 /**
  * Base class for concrete database test extension implementations.
@@ -30,32 +31,30 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
          */
         DATABASE_PER_EXECUTION;
 
-        private DatabaseStateStrategy toStrategy(TestDatabase database) {
+        private DatabaseStateStrategy toStrategy(TestDatabase database, Consumer<DataSource> migrator, boolean migrateOnce) {
             switch (this) {
                 case DATABASE_PER_TEST_METHOD:
-                    return new PerMethodStrategy(database);
+                    return new PerMethodStrategy(database, migrator, migrateOnce);
                 case DATABASE_PER_TEST_CLASS:
-                    return new PerClassStrategy(database);
+                    return new PerClassStrategy(database, migrator, migrateOnce);
                 case DATABASE_PER_EXECUTION:
-                    return new PerExecutionStrategy(database);
+                    return new PerExecutionStrategy(database, migrator, migrateOnce);
                 default:
                     throw new IllegalStateException("No strategy exists for " + this + " mode");
             }
         }
     }
 
-    private final TestDatabase database;
     private final DatabaseStateStrategy stateStrategy;
 
-    DatabaseTestExtension(TestDatabase database, Mode mode) {
-        this.database = database;
-        this.stateStrategy = mode.toStrategy(database);
+    DatabaseTestExtension(TestDatabase database, Mode mode, boolean migrateOnce) {
+        this.stateStrategy = mode.toStrategy(database, this::migrateDatabase, migrateOnce);
     }
 
     @Override
     public void beforeEach(ExtensionContext context) {
         stateStrategy.beforeTest(context.getRequiredTestClass());
-        createFreshMigratedDatabase();
+        stateStrategy.prepareTestDatabase();
     }
 
     @Override
@@ -80,18 +79,4 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
      * @param dataSource to use with database migration tool of your choice
      */
     abstract protected void migrateDatabase(DataSource dataSource);
-
-    abstract void createFreshMigratedDatabase();
-
-    void migrateTemplateDatabase() {
-        database.migrateTemplateDatabase(this::migrateDatabase);
-    }
-
-    void cloneTemplateDatabaseToTestDatabase() {
-        stateStrategy.cloneTemplateDatabaseToTestDatabase();
-    }
-
-    void createAndMigrateDatabase() {
-        stateStrategy.createAndMigrateDatabase(this::migrateDatabase);
-    }
 }

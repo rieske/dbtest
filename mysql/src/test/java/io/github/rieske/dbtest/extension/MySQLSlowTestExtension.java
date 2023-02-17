@@ -5,11 +5,6 @@ package io.github.rieske.dbtest.extension;
  */
 abstract class MySQLSlowTestExtension extends MySQLTestExtension {
     MySQLSlowTestExtension(String databaseVersion, Mode mode) {
-        super(databaseVersion, mode);
-    }
-
-    @Override
-    void createFreshMigratedDatabase() {
-        createAndMigrateDatabase();
+        super(databaseVersion, mode, false);
     }
 }

@@ -5,11 +5,6 @@ package io.github.rieske.dbtest.extension;
  */
 abstract class PostgreSQLSlowTestExtension extends PostgreSQLTestExtension {
     PostgreSQLSlowTestExtension(String databaseVersion, Mode mode) {
-        super(databaseVersion, mode);
-    }
-
-    @Override
-    void createFreshMigratedDatabase() {
-        createAndMigrateDatabase();
+        super(databaseVersion, mode, false);
     }
 }

@@ -19,7 +19,7 @@ The extension can operate in one of three [Modes](base/src/main/java/io/github/r
   This mode is the fastest of all, however, it provides no state guarantees. Tests must not make any
   assumptions about the state of the database (which may be modified by other tests).
 
-### Postgres
+### PostgreSQL
 
 Maven Central coordinates: [`io.github.rieske.dbtest:postgresql`](https://mvnrepository.com/artifact/io.github.rieske.dbtest/postgresql)
 
@@ -29,7 +29,7 @@ import io.github.rieske.dbtest.extension.PostgreSQLFastTestExtension;
 
 public class MyDatabaseTestExtension extends PostgreSQLFastTestExtension {
 
-    public PostgresEventStoreExtension() {
+    public MyDatabaseTestExtension() {
         super(
               "14.4-alpine", // the Docker image tag of the official PosgreSQL Docker image
               Mode.DATABASE_PER_TEST_METHOD
@@ -63,7 +63,7 @@ class MyDatabaseTest {
 }
 ```
 
-### MySql
+### MySQL
 
 Maven Central coordinates: [`io.github.rieske.dbtest:mysql`](https://mvnrepository.com/artifact/io.github.rieske.dbtest/mysql)
 
@@ -107,22 +107,22 @@ assumes that it is working with a clean database. The performance bottleneck in 
 migrations to initialize a clean database for each test.
 Solving this bottleneck is database vendor specific and works better with some than the others.
 
-### Postgres
+### PostgreSQL
 
-Postgres container from testcontainers library by default disables `fsync` which provides similar speed
+PostgreSQL container from testcontainers library by default disables `fsync` which provides similar speed
 boost as tmpfs by not flushing the changes to disk and keeping everything in memory.
 Still, my experiments show that both `fsync off` and `tmpfs` speed things up even a tiny bit more.
 
-To solve the migrations problem with Postgres database, we can apply all the migrations once to the default 
+To solve the migrations problem with PostgreSQL` database, we can apply all the migrations once to the default 
 `postgres` database.
 We can then use this database as a [template](https://www.postgresql.org/docs/current/manage-ag-templatedbs.html)
 to cheaply copy the fresh state to a new database for each test.
 
 TODO: show the speed difference
 
-### MySql
+### MySQL
 
-MySql does not have built in way to copy a database from a template like Postgres.
+MySQL does not have built in way to copy a database from a template like PostgreSQL.
 We can work around this by applying the migrations to a database once,
 then dumping it to a sql file and ingesting this file in a new database each time.
 This way, we apply only a single migration that represents the latest state per test run

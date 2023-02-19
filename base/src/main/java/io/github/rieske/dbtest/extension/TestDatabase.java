@@ -6,9 +6,9 @@ import java.sql.SQLException;
 import java.util.function.Consumer;
 
 abstract class TestDatabase {
-    final DatabaseState perMethod = new DatabaseState.PerMethod();
-    final DatabaseState perClass = new DatabaseState.PerClass();
-    final DatabaseState perExecution = new DatabaseState.PerExecution();
+    final DatabaseState perMethod = new DatabaseState.PerMethod(this);
+    final DatabaseState perClass = new DatabaseState.PerClass(this);
+    final DatabaseState perExecution = new DatabaseState.PerExecution(this);
 
     private volatile boolean templateDatabaseMigrated = false;
 

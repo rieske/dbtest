@@ -11,7 +11,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-abstract class DatabaseTest {
+public abstract class DatabaseTest {
     @RegisterExtension
     private final DatabaseTestExtension database;
 

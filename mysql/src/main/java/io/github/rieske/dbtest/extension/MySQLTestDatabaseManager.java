@@ -4,9 +4,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 class MySQLTestDatabaseManager {
-    private static final Map<String, MySQLTestDatabase> DATABASES = new ConcurrentHashMap<>();
+    private static final Map<String, TestDatabase> DATABASES = new ConcurrentHashMap<>();
 
-    static MySQLTestDatabase getDatabase(String version) {
-        return DATABASES.computeIfAbsent(version, MySQLTestDatabase::new);
+    static TestDatabase getDatabase(String version) {
+        return DATABASES.computeIfAbsent(version, v -> new TestDatabase(new MySQLTestDatabase(v)));
     }
 }

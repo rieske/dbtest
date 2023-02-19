@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.function.Consumer;
 
-class MySQLTestDatabase extends TestDatabase {
+class MySQLTestDatabase extends DatabaseEngine {
     private static final String DB_DUMP_FILENAME = "db_dump.sql";
 
     private final MySQLContainer<?> container;

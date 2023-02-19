@@ -1,52 +1,26 @@
 package io.github.rieske.dbtest.extension;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.function.Consumer;
+class TestDatabase {
+    private final DatabaseState perMethod;
+    private final DatabaseState perClass;
+    private final DatabaseState perExecution;
 
-abstract class TestDatabase {
-    final DatabaseState perMethod = new DatabaseState.PerMethod();
-    final DatabaseState perClass = new DatabaseState.PerClass();
-    final DatabaseState perExecution = new DatabaseState.PerExecution();
+    TestDatabase(DatabaseEngine databaseEngine) {
+        this.perMethod = new DatabaseState.PerMethod(databaseEngine);
+        this.perClass = new DatabaseState.PerClass(databaseEngine);
+        this.perExecution = new DatabaseState.PerExecution(databaseEngine);
+    }
 
-    private volatile boolean templateDatabaseMigrated = false;
-
-    void ensureTemplateDatabaseMigrated(Consumer<DataSource> migrator) {
-        if (!templateDatabaseMigrated) {
-            synchronized (this) {
-                if (!templateDatabaseMigrated) {
-                    migrateTemplateDatabase(migrator, dataSourceForDatabase(getTemplateDatabaseName()));
-                    templateDatabaseMigrated = true;
-                }
-            }
+    DatabaseState getState(DatabaseTestExtension.Mode mode) {
+        switch (mode) {
+            case DATABASE_PER_TEST_METHOD:
+                return perMethod;
+            case DATABASE_PER_TEST_CLASS:
+                return perClass;
+            case DATABASE_PER_EXECUTION:
+                return perExecution;
+            default:
+                throw new IllegalStateException("No database state strategy exists for " + this + " mode");
         }
     }
-
-    void createDatabase(String databaseName) {
-        executePrivileged("CREATE DATABASE " + databaseName);
-    }
-
-    void dropDatabase(String databaseName) {
-        executePrivileged("DROP DATABASE " + databaseName);
-    }
-
-    abstract void cloneTemplateDatabaseTo(String targetDatabaseName);
-
-    void executePrivileged(String sql) {
-        DataSource dataSource = getPrivilegedDataSource();
-        try (Connection conn = dataSource.getConnection()) {
-            conn.createStatement().execute(sql);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    abstract DataSource dataSourceForDatabase(String databaseName);
-
-    abstract String getTemplateDatabaseName();
-
-    abstract DataSource getPrivilegedDataSource();
-
-    abstract void migrateTemplateDatabase(Consumer<DataSource> migrator, DataSource templateDataSource);
 }

@@ -4,15 +4,19 @@ import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.InvocationInterceptor;
+import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
 
 import javax.sql.DataSource;
+import java.lang.reflect.Constructor;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
  * Base class for concrete database test extension implementations.
  * Encapsulates the core extension behavior that does not rely on backing database specifics.
  */
-public abstract class DatabaseTestExtension implements Extension, BeforeEachCallback, AfterEachCallback {
+public abstract class DatabaseTestExtension implements Extension, BeforeEachCallback, AfterEachCallback, InvocationInterceptor {
 
     /**
      * Extension execution mode. Defines the database state guarantees for test executions.
@@ -29,44 +33,38 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
         /**
          * Create a single database per JVM process. Any state written by tests will be visible to other tests.
          */
-        DATABASE_PER_EXECUTION;
-
-        private String ensureDatabaseCreated(TestDatabase database, Consumer<String> databaseCreator, Class<?> testClass) {
-            switch (this) {
-                case DATABASE_PER_TEST_METHOD:
-                    return database.perMethod.ensureDatabaseCreated(testClass, databaseCreator);
-                case DATABASE_PER_TEST_CLASS:
-                    return database.perClass.ensureDatabaseCreated(testClass, databaseCreator);
-                case DATABASE_PER_EXECUTION:
-                    return database.perExecution.ensureDatabaseCreated(testClass, databaseCreator);
-                default:
-                    throw new IllegalStateException("No strategy exists for " + this + " mode");
-            }
-        }
+        DATABASE_PER_EXECUTION
     }
 
-    private final TestDatabase database;
-    private final Consumer<String> databaseCreator;
-    private final Mode mode;
+    private final DatabaseState databaseState;
+    private final BiConsumer<DatabaseEngine, String> databaseCreator;
 
+    private Class<?> testClass;
     private String databaseName;
 
     DatabaseTestExtension(TestDatabase database, Mode mode, boolean migrateOnce) {
-        this.database = database;
-        this.databaseCreator = makeDatabaseCreator(database, migrateOnce);
-        this.mode = mode;
+        this.databaseState = database.getState(mode);
+        this.databaseCreator = makeDatabaseCreator(migrateOnce, this::migrateDatabase);
+    }
+
+    @Override
+    public <T> T interceptTestClassConstructor(
+            Invocation<T> invocation,
+            ReflectiveInvocationContext<Constructor<T>> invocationContext,
+            ExtensionContext extensionContext
+    ) throws Throwable {
+        this.testClass = extensionContext.getRequiredTestClass();
+        return invocation.proceed();
     }
 
     @Override
     public void beforeEach(ExtensionContext context) {
-        this.databaseName = mode.ensureDatabaseCreated(database, databaseCreator, context.getRequiredTestClass());
+        this.testClass = context.getRequiredTestClass();
     }
 
     @Override
     public void afterEach(ExtensionContext context) {
-        if (mode == Mode.DATABASE_PER_TEST_METHOD) {
-            database.dropDatabase(databaseName);
-        }
+        databaseState.afterTestMethod(databaseName);
     }
 
     /**
@@ -76,7 +74,8 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
      * @return dataSource for a migrated database
      */
     public DataSource getDataSource() {
-        return database.dataSourceForDatabase(databaseName);
+        this.databaseName = databaseState.ensureDatabaseCreated(databaseName, testClass, databaseCreator);
+        return databaseState.dataSourceForDatabase(databaseName);
     }
 
     /**
@@ -87,16 +86,16 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
      */
     abstract protected void migrateDatabase(DataSource dataSource);
 
-    private Consumer<String> makeDatabaseCreator(TestDatabase database, boolean migrateOnce) {
+    private static BiConsumer<DatabaseEngine, String> makeDatabaseCreator(boolean migrateOnce, Consumer<DataSource> migrator) {
         if (migrateOnce) {
-            return databaseName -> {
-                database.ensureTemplateDatabaseMigrated(this::migrateDatabase);
+            return (database, databaseName) -> {
+                database.ensureTemplateDatabaseMigrated(migrator);
                 database.cloneTemplateDatabaseTo(databaseName);
             };
         } else {
-            return databaseName -> {
+            return (database, databaseName) -> {
                 database.createDatabase(databaseName);
-                migrateDatabase(database.dataSourceForDatabase(databaseName));
+                migrator.accept(database.dataSourceForDatabase(databaseName));
             };
         }
     }

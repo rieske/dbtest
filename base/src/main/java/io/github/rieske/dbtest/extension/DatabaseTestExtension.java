@@ -33,33 +33,18 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
         /**
          * Create a single database per JVM process. Any state written by tests will be visible to other tests.
          */
-        DATABASE_PER_EXECUTION;
-
-        private DatabaseState getState(TestDatabase database) {
-            switch (this) {
-                case DATABASE_PER_TEST_METHOD:
-                    return database.perMethod;
-                case DATABASE_PER_TEST_CLASS:
-                    return database.perClass;
-                case DATABASE_PER_EXECUTION:
-                    return database.perExecution;
-                default:
-                    throw new IllegalStateException("No database state strategy exists for " + this + " mode");
-            }
-        }
+        DATABASE_PER_EXECUTION
     }
 
-    private final TestDatabase database;
-    private final BiConsumer<TestDatabase, String> databaseCreator;
-    private final Mode mode;
+    private final DatabaseState databaseState;
+    private final BiConsumer<DatabaseEngine, String> databaseCreator;
 
     private Class<?> testClass;
     private String databaseName;
 
     DatabaseTestExtension(TestDatabase database, Mode mode, boolean migrateOnce) {
-        this.database = database;
+        this.databaseState = database.getState(mode);
         this.databaseCreator = makeDatabaseCreator(migrateOnce, this::migrateDatabase);
-        this.mode = mode;
     }
 
     @Override
@@ -79,7 +64,7 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
 
     @Override
     public void afterEach(ExtensionContext context) {
-        mode.getState(database).afterTestMethod(databaseName);
+        databaseState.afterTestMethod(databaseName);
     }
 
     /**
@@ -89,8 +74,8 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
      * @return dataSource for a migrated database
      */
     public DataSource getDataSource() {
-        this.databaseName = mode.getState(database).ensureDatabaseCreated(databaseName, testClass, databaseCreator);
-        return database.dataSourceForDatabase(databaseName);
+        this.databaseName = databaseState.ensureDatabaseCreated(databaseName, testClass, databaseCreator);
+        return databaseState.dataSourceForDatabase(databaseName);
     }
 
     /**
@@ -101,7 +86,7 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
      */
     abstract protected void migrateDatabase(DataSource dataSource);
 
-    private static BiConsumer<TestDatabase, String> makeDatabaseCreator(boolean migrateOnce, Consumer<DataSource> migrator) {
+    private static BiConsumer<DatabaseEngine, String> makeDatabaseCreator(boolean migrateOnce, Consumer<DataSource> migrator) {
         if (migrateOnce) {
             return (database, databaseName) -> {
                 database.ensureTemplateDatabaseMigrated(migrator);

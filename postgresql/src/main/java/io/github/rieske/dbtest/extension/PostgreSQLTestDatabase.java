@@ -7,7 +7,7 @@ import javax.sql.DataSource;
 import java.util.Map;
 import java.util.function.Consumer;
 
-class PostgreSQLTestDatabase extends TestDatabase {
+class PostgreSQLTestDatabase extends DatabaseEngine {
     private final PostgreSQLContainer<?> container;
     private final String jdbcPrefix;
 

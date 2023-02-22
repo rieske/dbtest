@@ -1,0 +1,79 @@
+CREATE TABLE table_31(
+    id VARCHAR(36) NOT NULL PRIMARY KEY,
+    foo TEXT NOT NULL,
+    bar TEXT NOT NULL,
+    fizz TEXT NOT NULL,
+    buzz TEXT NOT NULL
+);
+
+CREATE TABLE table_32(
+    id VARCHAR(36) NOT NULL PRIMARY KEY,
+    foo TEXT NOT NULL,
+    bar TEXT NOT NULL,
+    fizz TEXT NOT NULL,
+    buzz TEXT NOT NULL
+);
+
+CREATE TABLE table_33(
+    id VARCHAR(36) NOT NULL PRIMARY KEY,
+    foo TEXT NOT NULL,
+    bar TEXT NOT NULL,
+    fizz TEXT NOT NULL,
+    buzz TEXT NOT NULL
+);
+
+CREATE TABLE table_34(
+    id VARCHAR(36) NOT NULL PRIMARY KEY,
+    foo TEXT NOT NULL,
+    bar TEXT NOT NULL,
+    fizz TEXT NOT NULL,
+    buzz TEXT NOT NULL
+);
+
+CREATE TABLE table_35(
+    id VARCHAR(36) NOT NULL PRIMARY KEY,
+    foo TEXT NOT NULL,
+    bar TEXT NOT NULL,
+    fizz TEXT NOT NULL,
+    buzz TEXT NOT NULL
+);
+
+CREATE TABLE table_36(
+    id VARCHAR(36) NOT NULL PRIMARY KEY,
+    foo TEXT NOT NULL,
+    bar TEXT NOT NULL,
+    fizz TEXT NOT NULL,
+    buzz TEXT NOT NULL
+);
+
+CREATE TABLE table_37(
+    id VARCHAR(36) NOT NULL PRIMARY KEY,
+    foo TEXT NOT NULL,
+    bar TEXT NOT NULL,
+    fizz TEXT NOT NULL,
+    buzz TEXT NOT NULL
+);
+
+CREATE TABLE table_38(
+    id VARCHAR(36) NOT NULL PRIMARY KEY,
+    foo TEXT NOT NULL,
+    bar TEXT NOT NULL,
+    fizz TEXT NOT NULL,
+    buzz TEXT NOT NULL
+);
+
+CREATE TABLE table_39(
+    id VARCHAR(36) NOT NULL PRIMARY KEY,
+    foo TEXT NOT NULL,
+    bar TEXT NOT NULL,
+    fizz TEXT NOT NULL,
+    buzz TEXT NOT NULL
+);
+
+CREATE TABLE table_40(
+    id VARCHAR(36) NOT NULL PRIMARY KEY,
+    foo TEXT NOT NULL,
+    bar TEXT NOT NULL,
+    fizz TEXT NOT NULL,
+    buzz TEXT NOT NULL
+);

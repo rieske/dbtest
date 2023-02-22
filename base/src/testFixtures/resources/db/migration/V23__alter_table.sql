@@ -1,0 +1,2 @@
+ALTER TABLE table_12 DROP COLUMN fizz;
+ALTER TABLE table_12 DROP COLUMN buzz;

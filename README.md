@@ -113,7 +113,7 @@ PostgreSQL container from testcontainers library by default disables `fsync` whi
 boost as tmpfs by not flushing the changes to disk and keeping everything in memory.
 Still, my experiments show that both `fsync off` and `tmpfs` speed things up even a tiny bit more.
 
-To solve the migrations problem with PostgreSQL` database, we can apply all the migrations once to the default 
+To solve the migrations problem with PostgreSQL database, we can apply all the migrations once to the default 
 `postgres` database.
 We can then use this database as a [template](https://www.postgresql.org/docs/current/manage-ag-templatedbs.html)
 to cheaply copy the fresh state to a new database for each test.

@@ -43,6 +43,11 @@ public abstract class PerformanceTests {
         }
 
         @RepeatedTest(REPETITIONS)
+        void initDatabaseOnly() {
+            database.getDataSource();
+        }
+
+        @RepeatedTest(REPETITIONS)
         void interactWithDatabase() {
             UUID id = UUID.randomUUID();
             String foo = UUID.randomUUID().toString();

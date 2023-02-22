@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public abstract class DatabaseTest {
     @RegisterExtension
-    private final DatabaseTestExtension database;
+    protected final DatabaseTestExtension database;
 
     DatabaseTest(DatabaseTestExtension database) {
         this.database = database;

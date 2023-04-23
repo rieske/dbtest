@@ -9,7 +9,7 @@ dependencies {
     api("org.junit.jupiter:junit-jupiter-api:5.9.2")
 
     testFixturesApi("org.assertj:assertj-core:3.24.2")
-    testFixturesImplementation("org.flywaydb:flyway-core:9.15.2")
+    testFixturesImplementation("org.flywaydb:flyway-core:9.16.3")
 }
 
 components.java.withVariantsFromConfiguration(configurations.testFixturesApiElements) { skip() }

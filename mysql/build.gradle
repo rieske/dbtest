@@ -7,7 +7,7 @@ description = "Fast tests against containerized MySql database."
 dependencies {
     api(project(":base"))
 
-    implementation("mysql:mysql-connector-java:8.0.32")
+    implementation("mysql:mysql-connector-java:8.0.33")
     implementation("org.testcontainers:mysql:1.17.6")
 }
 

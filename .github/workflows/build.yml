@@ -56,6 +56,21 @@ jobs:
         with:
           arguments: :mysql:test
 
+  h2-tests:
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: 11
+          distribution: temurin
+      - name: Test H2 support
+        uses: burrunan/gradle-cache-action@v1
+        with:
+          arguments: :h2:test
+
   results:
     if: ${{ always() }}
     runs-on: ubuntu-latest

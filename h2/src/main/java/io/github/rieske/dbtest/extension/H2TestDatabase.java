@@ -10,7 +10,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 class H2TestDatabase extends DatabaseEngine {
-    private record Database(String name, DataSource dataSource, Connection connection) {}
+    private static final class Database {
+        final DataSource dataSource;
+        final Connection connection;
+
+        private Database(DataSource dataSource, Connection connection) {
+            this.dataSource = dataSource;
+            this.connection = connection;
+        }
+    }
 
     private final DataSource templateDataSource;
     private final Map<String, Database> databases = new ConcurrentHashMap<>();
@@ -32,12 +40,12 @@ class H2TestDatabase extends DatabaseEngine {
             JdbcDataSource dataSource = new JdbcDataSource();
             dataSource.setUrl("jdbc:h2:mem:" + databaseName + ";MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=1");
             try {
-                databases.put(databaseName, new Database(databaseName, dataSource, dataSource.getConnection()));
+                databases.put(databaseName, new Database(dataSource, dataSource.getConnection()));
             } catch (SQLException e) {
                 throw new RuntimeException("Could not acquire a connection", e);
             }
         }
-        return databases.get(databaseName).dataSource();
+        return databases.get(databaseName).dataSource;
     }
 
     @Override
@@ -60,7 +68,7 @@ class H2TestDatabase extends DatabaseEngine {
         Database database = databases.get(databaseName);
         if (database != null) {
             try {
-                database.connection().close();
+                database.connection.close();
             } catch (SQLException e) {
                 throw new RuntimeException("Could not close a connection", e);
             }

@@ -7,8 +7,8 @@ description = "Fast tests against containerized MySql database."
 dependencies {
     api(project(":base"))
 
-    implementation("mysql:mysql-connector-java:8.0.32")
-    implementation("org.testcontainers:mysql:1.17.6")
+    implementation("mysql:mysql-connector-java:8.0.33")
+    implementation("org.testcontainers:mysql:1.18.0")
 }
 
 testing {
@@ -16,7 +16,7 @@ testing {
         test {
             dependencies {
                 implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.20.0")
-                implementation("org.flywaydb:flyway-mysql:9.15.2")
+                implementation("org.flywaydb:flyway-mysql:9.16.3")
                 implementation(project.dependencies.testFixtures(project(":base")))
             }
             targets {

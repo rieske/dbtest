@@ -14,6 +14,11 @@ class PostgreSQLTestDatabase extends DatabaseEngine {
     @SuppressWarnings("resource")
     PostgreSQLTestDatabase(String version) {
         this.container = new PostgreSQLContainer<>("postgres:" + version).withReuse(true);
+        this.container.setCommand(
+                "postgres",
+                "-c", "fsync=off",
+                "-c", "full_page_writes=off"
+        );
         this.container.withTmpFs(Map.of("/var/lib/postgresql/data", "rw"));
         this.container.start();
         this.jdbcPrefix = "jdbc:postgresql://" + container.getHost() + ":" + container.getMappedPort(5432) + "/";

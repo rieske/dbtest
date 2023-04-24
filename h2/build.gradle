@@ -1,0 +1,22 @@
+plugins {
+    id("io.github.rieske.dbtest.published-library")
+}
+
+description = "Fast tests against in-memory H2 database."
+
+dependencies {
+    api(project(":base"))
+
+    implementation("com.h2database:h2:2.1.214")
+}
+
+testing {
+    suites {
+        test {
+            dependencies {
+                implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.20.0")
+                implementation(project.dependencies.testFixtures(project(":base")))
+            }
+        }
+    }
+}

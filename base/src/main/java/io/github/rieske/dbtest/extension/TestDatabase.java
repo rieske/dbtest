@@ -20,7 +20,7 @@ class TestDatabase {
             case DATABASE_PER_EXECUTION:
                 return perExecution;
             default:
-                throw new IllegalStateException("No database state strategy exists for " + this + " mode");
+                throw new IllegalStateException("No database state strategy exists for " + mode + " mode");
         }
     }
 }

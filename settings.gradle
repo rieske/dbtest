@@ -11,3 +11,4 @@ rootProject.name = "dbtest"
 include(":base")
 include(":mysql")
 include(":postgresql")
+include(":h2")

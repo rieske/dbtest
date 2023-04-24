@@ -63,6 +63,11 @@ class H2TestDatabase extends DatabaseEngine {
     @Override
     void migrateTemplateDatabase(Consumer<DataSource> migrator, DataSource templateDataSource) {
         this.migrator = migrator;
+        migrator.accept(templateDataSource);
+    }
+
+    @Override
+    void createDatabase(String databaseName) {
     }
 
     @Override

@@ -75,7 +75,7 @@ jobs:
     if: ${{ always() }}
     runs-on: ubuntu-latest
     name: Build Outcome
-    needs: [ build, postgres-tests, mysql-tests ]
+    needs: [ build, postgres-tests, mysql-tests, h2-tests ]
     steps:
       - run: |
           buildResult="${{ needs.build.result }}"
@@ -88,6 +88,10 @@ jobs:
           fi
           mysqlTestResult="${{ needs.mysql-tests.result }}"
           if [[ $mysqlTestResult != "success" && $mysqlTestResult != "skipped" ]]; then
+            exit 1
+          fi
+          h2TestResult="${{ needs.h2-tests.result }}"
+          if [[ $h2TestResult != "success" && $h2TestResult != "skipped" ]]; then
             exit 1
           fi
           exit 0

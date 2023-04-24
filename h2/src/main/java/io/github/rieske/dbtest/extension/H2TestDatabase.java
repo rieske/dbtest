@@ -20,12 +20,14 @@ class H2TestDatabase extends DatabaseEngine {
         }
     }
 
+    private final H2Mode h2Mode;
     private final DataSource templateDataSource;
     private final Map<String, Database> databases = new ConcurrentHashMap<>();
     private Consumer<DataSource> migrator;
 
 
-    H2TestDatabase() {
+    H2TestDatabase(H2Mode h2Mode) {
+        this.h2Mode = h2Mode;
         this.templateDataSource = dataSourceForDatabase(getTemplateDatabaseName());
     }
 
@@ -38,7 +40,7 @@ class H2TestDatabase extends DatabaseEngine {
     DataSource dataSourceForDatabase(String databaseName) {
         if (!databases.containsKey(databaseName)) {
             JdbcDataSource dataSource = new JdbcDataSource();
-            dataSource.setUrl("jdbc:h2:mem:" + databaseName + ";MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=1");
+            dataSource.setUrl("jdbc:h2:mem:" + databaseName + ";DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=1;MODE=" + h2Mode.connectionStringValue);
             try {
                 databases.put(databaseName, new Database(dataSource, dataSource.getConnection()));
             } catch (SQLException e) {

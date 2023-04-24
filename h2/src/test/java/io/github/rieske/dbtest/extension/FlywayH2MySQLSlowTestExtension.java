@@ -4,9 +4,9 @@ import io.github.rieske.dbtest.FlywayMigrator;
 
 import javax.sql.DataSource;
 
-public class FlywayH2FastTestExtension extends H2FastTestExtension {
-    public FlywayH2FastTestExtension(DatabaseTestExtension.Mode mode) {
-        super(H2Mode.POSTGRESQL, mode);
+public class FlywayH2MySQLSlowTestExtension extends H2SlowTestExtension {
+    public FlywayH2MySQLSlowTestExtension(Mode mode) {
+        super(H2Mode.MYSQL, mode);
     }
 
     @Override

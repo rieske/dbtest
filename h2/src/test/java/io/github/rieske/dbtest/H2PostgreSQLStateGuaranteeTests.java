@@ -3,7 +3,7 @@ package io.github.rieske.dbtest;
 import io.github.rieske.dbtest.extension.DatabaseTestExtension;
 import org.junit.jupiter.api.Nested;
 
-class H2StateGuaranteeTests implements H2Test {
+class H2PostgreSQLStateGuaranteeTests implements H2PostgreSQLTest {
     @Nested
     class H2DatabasePerTestMethodTest extends DatabasePerTestMethodTest {
         H2DatabasePerTestMethodTest() {

@@ -7,7 +7,11 @@ public enum H2Mode {
     /**
      * Emulate PostgreSQL
      */
-    POSTGRESQL("PostgreSQL");
+    POSTGRESQL("PostgreSQL"),
+    /**
+     * Emulate MySQL
+     */
+    MYSQL("MySQL");
 
     final String connectionStringValue;
 

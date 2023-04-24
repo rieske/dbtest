@@ -42,8 +42,8 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
     private Class<?> testClass;
     private String databaseName;
 
-    DatabaseTestExtension(TestDatabase database, Mode mode, boolean migrateOnce) {
-        this.databaseState = database.getState(mode);
+    DatabaseTestExtension(TestDatabase database, Mode dataRetentionMode, boolean migrateOnce) {
+        this.databaseState = database.getState(dataRetentionMode);
         this.databaseCreator = makeDatabaseCreator(migrateOnce, this::migrateDatabase);
     }
 

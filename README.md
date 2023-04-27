@@ -3,7 +3,7 @@
 ![Maven Central](https://img.shields.io/maven-central/v/io.github.rieske.dbtest/postgresql)
 [![Actions Status](https://github.com/rieske/java-fast-database-tests/workflows/main/badge.svg)](https://github.com/rieske/java-fast-database-tests/actions)
 
-A library that enables fast integration tests against a containerized database.
+Java library that enables fast integration tests against a containerized database.
 
 ## Usage
 

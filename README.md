@@ -70,6 +70,20 @@ Maven Central coordinates: [`io.github.rieske.dbtest:mysql`](https://mvnreposito
 Usage is the same as with PostgreSQL example above, just that the base class to extend is
 [MySQLTestExtension](mysql/src/main/java/io/github/rieske/dbtest/extension/MySQLTestExtension.java).
 
+### H2
+
+Maven Central coordinates: [`io.github.rieske.dbtest:h2`](https://mvnrepository.com/artifact/io.github.rieske.dbtest/h2)
+
+You can also use this library with H2 database. There will be no performance gains over manual H2 usage - this library
+will run the migrations for each test. However, it observes the data consistency guarantees as specified by the Mode enum
+described above.
+
+H2 is still a lot faster than a containerized database and if your setup does not require any of the database vendor
+specific features that H2 does not support, you may want to develop and quickly iterate with H2 backed tests and
+have the same tests executed against a containerized database during a separate test phase.
+
+H2 version supports both PosgreSQL and MySQL compatibility modes - see [H2Mode](h2/src/main/java/io/github/rieske/dbtest/extension/H2Mode.java) enum.
+
 ## Details
 
 We always want to test the database interactions against a database - we must know that the SQL that we wrote

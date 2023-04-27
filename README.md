@@ -10,10 +10,10 @@ A library that enables fast integration tests against a containerized database.
 This library exposes a JUnit5 test extension for the database vendors listed below.
 [Testcontainers](https://www.testcontainers.org/) library is used under the hood to manage the Docker containers.
 
-The extension can operate in one of three [Modes](base/src/main/java/io/github/rieske/dbtest/extension/DatabaseTestExtension.java):
+The extension can operate in one of three [modes](base/src/main/java/io/github/rieske/dbtest/extension/DatabaseTestExtension.java):
 - `DATABASE_PER_TEST_METHOD` - Each test method gets a clean migrated database. No state leaks between tests.
   This mode is the slowest of all, but it provides the strictest state guarantees. This is what this library
-  optimizes for.
+  optimizes for. Scroll below to see the performance comparisons.
 - `DATABASE_PER_TEST_CLASS` - Test methods within a test class will share a database.
 - `DATABASE_PER_EXECUTION` - Single database will be shared by all extensions registered with this mode.
   This mode is the fastest of all, however, it provides no state guarantees. Tests must not make any
@@ -31,7 +31,7 @@ public class MyDatabaseTestExtension extends PostgreSQLFastTestExtension {
 
     public MyDatabaseTestExtension() {
         super(
-              "14.4-alpine", // the Docker image tag of the official PosgreSQL Docker image
+              "14.4-alpine", // the Docker image tag of the official PostgreSQL Docker image
               Mode.DATABASE_PER_TEST_METHOD
         );
     }
@@ -78,7 +78,7 @@ We always want to test the database interactions against a database - we must kn
 Before [Docker](https://www.docker.com/) and before libraries like [Testcontainers](https://www.testcontainers.org/) 
 that provide convenient APIs to use containers in our  tests, the solution that somewhat works has been the 
 in memory databases like [H2](https://www.h2database.com/html/main.html) or [HSQLDB](https://hsqldb.org/). 
-Those are fast, they have modes to somewhat emulate some popular databases like MySQL or PostgreSQL. 
+Those are fast, they have modes to somewhat emulate some popular databases like PostgreSQL or MySQL . 
 They may work fine if you don't happen to use some database vendor feature or extension
 that the in-memory databases do not emulate. 
 But they are still not the real thing - the tests run against one database type and 
@@ -118,8 +118,6 @@ To solve the migrations problem with PostgreSQL database, we can apply all the m
 We can then use this database as a [template](https://www.postgresql.org/docs/current/manage-ag-templatedbs.html)
 to cheaply copy the fresh state to a new database for each test.
 
-TODO: show the speed difference
-
 ### MySQL
 
 MySQL does not have built in way to copy a database from a template like PostgreSQL.
@@ -128,4 +126,41 @@ then dumping it to a sql file and ingesting this file in a new database each tim
 This way, we apply only a single migration that represents the latest state per test run
 instead of applying all migrations every time.
 
-TODO: show the speed difference
+## Performance
+
+To demonstrate the gains, I created [50 database migrations](base/src/testFixtures/resources/db/migration)
+that perform some simple back and forth table modifications 
+(in real life, the schemas are usually more complex and thus take more time to execute) and used [three simple test cases](base/src/testFixtures/java/io/github/rieske/dbtest/PerformanceTests.java):
+- `doNothing` - a test that does nothing at all itself. Only the setup code runs. 
+- `initDatabaseOnly` - a test that explicitly requests a data source and does nothing else.
+  The data source must be ready to use and the database must be prepared/migrated.
+- `interactWithDatabase` - a test that requests a data source and interacts with the database - performs an insert and a select.
+
+I ran the tests repeatedly 1000 times each in data consistency mode both with the "migrate only once" feature and without it.
+
+As mentioned above, this library optimizes for the `DATABASE_PER_TEST_METHOD` use case - a fresh database for each test method - 
+eliminating repeated data migrations is where the gains come from.
+
+The `DATABASE_PER_EXECUTION` mode yields the same results - the data is migrated once anyway.
+
+The `DATABASE_PER_TEST_CLASS` mode also yields the same in the given test setup, given there is just one test class.
+In the real world, we would see an improvement depending on the amount of test classes that interact with the database.
+
+### PostgreSQL
+
+| Test                 | migrate each time | migrate once | improvement |
+|----------------------|:-----------------:|:------------:|:-----------:|
+| doNothing            |       0.5s        |     0.5s     |     0%      |
+| initDatabaseOnly     |      10m 56s      |    1m 31s    |   87.65%    |
+| interactWithDatabase |      12m 31s      |    2m 43s    |   78.58%    |
+
+### MySQL
+
+| Test                 | migrate each time | migrate once | improvement |
+|----------------------|:-----------------:|:------------:|:-----------:|
+| doNothing            |       0.5s        |     0.5s     |     0%      |
+| initDatabaseOnly     |      51m 36s      |   15m 53s    |   69.22%    |
+| interactWithDatabase |      55m 2s       |   16m 26s    |   70.14%    |
+
+I still haven't figured why MySQL performs so much worse than PostgreSQL here.
+Still, the gains of saving on repeated migrations are significant.

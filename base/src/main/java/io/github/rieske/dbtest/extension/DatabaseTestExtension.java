@@ -6,6 +6,8 @@ import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Constructor;
@@ -17,6 +19,7 @@ import java.util.function.Consumer;
  * Encapsulates the core extension behavior that does not rely on backing database specifics.
  */
 public abstract class DatabaseTestExtension implements Extension, BeforeEachCallback, AfterEachCallback, InvocationInterceptor {
+    private static final Logger log = LoggerFactory.getLogger(DatabaseTestExtension.class);
 
     /**
      * Extension execution mode. Defines the database state guarantees for test executions.
@@ -90,12 +93,18 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
         if (migrateOnce) {
             return (database, databaseName) -> {
                 database.ensureTemplateDatabaseMigrated(migrator);
+                long startTime = System.currentTimeMillis();
+                log.info("Copying migrated template database to {}", databaseName);
                 database.cloneTemplateDatabaseTo(databaseName);
+                log.info("Copied migrated template database to {} in {}", databaseName, TimeUtils.durationSince(startTime));
             };
         } else {
             return (database, databaseName) -> {
                 database.createDatabase(databaseName);
+                long startTime = System.currentTimeMillis();
+                log.info("Migrating database {}", databaseName);
                 migrator.accept(database.dataSourceForDatabase(databaseName));
+                log.info("Migrated database {} in {}", databaseName, TimeUtils.durationSince(startTime));
             };
         }
     }

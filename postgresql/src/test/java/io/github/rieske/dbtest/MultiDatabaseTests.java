@@ -5,8 +5,8 @@ import io.github.rieske.dbtest.extension.FlywayPostgreSQLFastTestExtension;
 import org.junit.jupiter.api.Nested;
 
 public class MultiDatabaseTests {
-    private static final String V1 = "15.2-alpine";
-    private static final String V2 = "14.7-alpine";
+    private static final String V1 = "15.2";
+    private static final String V2 = "14.7";
 
     @Nested
     class PostgreSQLDatabasePerTestMethodTest extends MultiDatabaseTest {

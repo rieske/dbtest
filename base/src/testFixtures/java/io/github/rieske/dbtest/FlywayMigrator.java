@@ -10,6 +10,7 @@ public final class FlywayMigrator {
 
     public static void migrateDatabase(DataSource dataSource) {
         Flyway.configure()
+                .loggers("slf4j")
                 .dataSource(dataSource)
                 .load()
                 .migrate();

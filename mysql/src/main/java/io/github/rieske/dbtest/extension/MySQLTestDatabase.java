@@ -1,6 +1,8 @@
 package io.github.rieske.dbtest.extension;
 
 import com.mysql.cj.jdbc.MysqlDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.MySQLContainer;
 
@@ -10,6 +12,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 class MySQLTestDatabase extends DatabaseEngine {
+    private static final Logger log = LoggerFactory.getLogger(MySQLTestDatabase.class);
     private static final String DB_DUMP_FILENAME = "db_dump.sql";
 
     private final MySQLContainer<?> container;
@@ -17,7 +20,8 @@ class MySQLTestDatabase extends DatabaseEngine {
 
     @SuppressWarnings("resource")
     MySQLTestDatabase(String version) {
-        this.container = new MySQLContainer<>("mysql:" + version).withReuse(true);
+        String dockerImageName = "mysql:" + version;
+        this.container = new MySQLContainer<>(dockerImageName).withReuse(true);
         this.container.withTmpFs(Map.of("/var/lib/mysql", "rw"));
         this.container.withCommand(
                 "mysqld",
@@ -26,7 +30,10 @@ class MySQLTestDatabase extends DatabaseEngine {
                 "--innodb-doublewrite=0",
                 "--innodb-flush-log-at-trx-commit=0"
         );
+        long startTime = System.currentTimeMillis();
+        log.info("Starting {} container", dockerImageName);
         this.container.start();
+        log.info("Started {} container in {}", dockerImageName, TimeUtils.durationSince(startTime));
         this.jdbcPrefix = "jdbc:mysql://" + container.getHost() + ":" + container.getMappedPort(3306) + "/";
     }
 

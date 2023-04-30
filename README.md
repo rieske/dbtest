@@ -31,7 +31,7 @@ public class MyDatabaseTestExtension extends PostgreSQLFastTestExtension {
 
     public MyDatabaseTestExtension() {
         super(
-              "14.4-alpine", // the Docker image tag of the official PostgreSQL Docker image
+              "15.2", // the Docker image tag of the official PostgreSQL Docker image
               Mode.DATABASE_PER_TEST_METHOD
         );
     }
@@ -150,7 +150,7 @@ that perform some simple back and forth table modifications
   The data source must be ready to use and the database must be prepared/migrated.
 - `interactWithDatabase` - a test that requests a data source and interacts with the database - performs an insert and a select.
 
-I ran the tests repeatedly 1000 times each in data consistency mode both with the "migrate only once" feature and without it.
+I ran the tests in parallel 1000 times in each data consistency mode both with the "migrate only once" feature and without it.
 
 As mentioned above, this library optimizes for the `DATABASE_PER_TEST_METHOD` use case - a fresh database for each test method - 
 eliminating repeated data migrations is where the gains come from.
@@ -165,8 +165,8 @@ In the real world, we would see an improvement depending on the amount of test c
 | Test                 | migrate each time | migrate once | improvement |
 |----------------------|:-----------------:|:------------:|:-----------:|
 | doNothing            |       0.5s        |     0.5s     |     0%      |
-| initDatabaseOnly     |      10m 56s      |    1m 31s    |   87.65%    |
-| interactWithDatabase |      12m 31s      |    2m 43s    |   78.58%    |
+| initDatabaseOnly     |      8m 17s       |    1m 35s    |   80.89%    |
+| interactWithDatabase |      9m 20s       |    2m 20s    |   75.00%    |
 
 ### MySQL
 

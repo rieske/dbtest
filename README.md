@@ -31,7 +31,7 @@ public class MyDatabaseTestExtension extends PostgreSQLFastTestExtension {
 
     public MyDatabaseTestExtension() {
         super(
-              "14.4-alpine", // the Docker image tag of the official PostgreSQL Docker image
+              "15.2", // the Docker image tag of the official PostgreSQL Docker image
               Mode.DATABASE_PER_TEST_METHOD
         );
     }
@@ -165,8 +165,8 @@ In the real world, we would see an improvement depending on the amount of test c
 | Test                 | migrate each time | migrate once | improvement |
 |----------------------|:-----------------:|:------------:|:-----------:|
 | doNothing            |       0.5s        |     0.5s     |     0%      |
-| initDatabaseOnly     |      10m 56s      |    1m 31s    |   87.65%    |
-| interactWithDatabase |      12m 31s      |    2m 43s    |   78.58%    |
+| initDatabaseOnly     |      8m 17s       |    1m 35s    |   80.89%    |
+| interactWithDatabase |      9m 20s       |    2m 20s    |   75.00%    |
 
 ### MySQL
 

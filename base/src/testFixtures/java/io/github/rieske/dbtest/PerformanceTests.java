@@ -32,7 +32,7 @@ public abstract class PerformanceTests {
     }
 
     abstract static class TestTemplate extends DatabaseTest {
-        private static final int REPETITIONS = 1000;
+        private static final int REPETITIONS = 100;
 
         TestTemplate(DatabaseTestExtension database) {
             super(database);

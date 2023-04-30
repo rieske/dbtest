@@ -150,7 +150,7 @@ that perform some simple back and forth table modifications
   The data source must be ready to use and the database must be prepared/migrated.
 - `interactWithDatabase` - a test that requests a data source and interacts with the database - performs an insert and a select.
 
-I ran the tests repeatedly 1000 times each in data consistency mode both with the "migrate only once" feature and without it.
+I ran the tests in parallel 1000 times in each data consistency mode both with the "migrate only once" feature and without it.
 
 As mentioned above, this library optimizes for the `DATABASE_PER_TEST_METHOD` use case - a fresh database for each test method - 
 eliminating repeated data migrations is where the gains come from.

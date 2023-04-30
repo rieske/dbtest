@@ -82,7 +82,7 @@ H2 is still a lot faster than a containerized database and if your setup does no
 specific features that H2 does not support, you may want to develop and quickly iterate with H2 backed tests and
 have the same tests executed against a containerized database during a separate test phase.
 
-H2 version supports both PosgreSQL and MySQL compatibility modes - see [H2Mode](h2/src/main/java/io/github/rieske/dbtest/extension/H2Mode.java) enum.
+H2 version supports both PostgreSQL and MySQL compatibility modes - see [H2Mode](h2/src/main/java/io/github/rieske/dbtest/extension/H2Mode.java) enum.
 
 ## Details
 

@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        mysql: [ 8.0.32, 8.0.31, 8.0.30 ]
+        mysql: [ 8.0.33, 8.0.31, 8.0.30 ]
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK

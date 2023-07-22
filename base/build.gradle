@@ -10,7 +10,7 @@ dependencies {
     implementation("org.slf4j:slf4j-api:2.0.7")
 
     testFixturesApi("org.assertj:assertj-core:3.24.2")
-    testFixturesImplementation("org.flywaydb:flyway-core:9.17.0")
+    testFixturesImplementation("org.flywaydb:flyway-core:9.21.0")
     testFixturesImplementation("ch.qos.logback:logback-classic:1.4.8")
 }
 

@@ -7,7 +7,7 @@ description = "Fast tests against in-memory H2 database."
 dependencies {
     api(project(":base"))
 
-    implementation("com.h2database:h2:2.2.222")
+    implementation("com.h2database:h2:2.2.224")
 }
 
 testing {

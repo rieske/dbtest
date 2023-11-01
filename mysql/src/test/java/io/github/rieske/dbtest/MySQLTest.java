@@ -6,7 +6,7 @@ import io.github.rieske.dbtest.extension.FlywayMySQLSlowTestExtension;
 
 interface MySQLTest {
     default String mysqlVersion() {
-        return Environment.getEnvOrDefault("MYSQL_VERSION", "8.0.33");
+        return Environment.getEnvOrDefault("MYSQL_VERSION", "8.2.0");
     }
 
     default DatabaseTestExtension slowExtension(DatabaseTestExtension.Mode mode) {

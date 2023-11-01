@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        postgres: [ 15.2, 14.7, 13.10]
+        postgres: [ "16.0", "15.4", "14.9", "13.12"]
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
       - name: Set up JDK
@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        mysql: [ 8.0.33, 8.0.31, 8.0.30 ]
+        mysql: [ "8.2.0", "8.1.0", "8.0.35" ]
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
       - name: Set up JDK

@@ -6,7 +6,7 @@ import io.github.rieske.dbtest.extension.FlywayPostgreSQLSlowTestExtension;
 
 public interface PostgreSQLTest {
     static String postgresVersion() {
-        return Environment.getEnvOrDefault("POSTGRES_VERSION", "15.2");
+        return Environment.getEnvOrDefault("POSTGRES_VERSION", "16.0");
     }
 
     default DatabaseTestExtension slowExtension(DatabaseTestExtension.Mode mode) {

@@ -15,7 +15,7 @@ class FieldExtensionLifecycleTests {
     @Nested
     class PerMethodTests {
         @RegisterExtension
-        private final DatabaseTestExtension database =
+        final DatabaseTestExtension database =
                 new FlywayPostgreSQLFastTestExtension(PostgreSQLTest.postgresVersion(), DatabaseTestExtension.Mode.DATABASE_PER_TEST_METHOD);
 
         private final TestRepository repository = new TestRepository(database.getDataSource());
@@ -31,7 +31,7 @@ class FieldExtensionLifecycleTests {
     @Nested
     class PerClassTests {
         @RegisterExtension
-        private final DatabaseTestExtension database =
+        final DatabaseTestExtension database =
                 new FlywayPostgreSQLFastTestExtension(PostgreSQLTest.postgresVersion(), DatabaseTestExtension.Mode.DATABASE_PER_TEST_CLASS);
 
         private final EarlyDatabaseExtensionUser exceptionSupplier = new EarlyDatabaseExtensionUser(database);
@@ -58,7 +58,7 @@ class FieldExtensionLifecycleTests {
     @Nested
     class PerExecutionTests {
         @RegisterExtension
-        private final DatabaseTestExtension database =
+        final DatabaseTestExtension database =
                 new FlywayPostgreSQLFastTestExtension(PostgreSQLTest.postgresVersion(), DatabaseTestExtension.Mode.DATABASE_PER_EXECUTION);
 
         private final TestRepository repository = new TestRepository(database.getDataSource());

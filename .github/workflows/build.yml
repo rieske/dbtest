@@ -1,20 +1,20 @@
-on:
-  workflow_call:
+on: workflow_call
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
-      - name: Set up JDK
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Java
         uses: actions/setup-java@v3
         with:
           java-version: 11
           distribution: temurin
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
       - name: Build
-        uses: burrunan/gradle-cache-action@v1
-        with:
-          arguments: build
+        run: ./gradlew build
 
   postgres-tests:
     needs: [ build ]
@@ -23,18 +23,19 @@ jobs:
       matrix:
         postgres: [ "16.0", "15.4", "14.9", "13.12"]
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
-      - name: Set up JDK
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Java
         uses: actions/setup-java@v3
         with:
           java-version: 11
           distribution: temurin
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
       - name: Test PostgreSQL versions
-        uses: burrunan/gradle-cache-action@v1
+        run: ./gradlew :postgresql:test
         env:
           POSTGRES_VERSION: ${{ matrix.postgres }}
-        with:
-          arguments: :postgresql:test
 
   mysql-tests:
     needs: [ build ]
@@ -43,33 +44,35 @@ jobs:
       matrix:
         mysql: [ "8.2.0", "8.1.0", "8.0.35" ]
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
-      - name: Set up JDK
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Java
         uses: actions/setup-java@v3
         with:
           java-version: 11
           distribution: temurin
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
       - name: Test MySQL versions
-        uses: burrunan/gradle-cache-action@v1
+        run: ./gradlew :mysql:test
         env:
           MYSQL_VERSION: ${{ matrix.mysql }}
-        with:
-          arguments: :mysql:test
 
   h2-tests:
     needs: [ build ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
-      - name: Set up JDK
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Java
         uses: actions/setup-java@v3
         with:
           java-version: 11
           distribution: temurin
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
       - name: Test H2 support
-        uses: burrunan/gradle-cache-action@v1
-        with:
-          arguments: :h2:test
+        run: ./gradlew :h2:test
 
   results:
     if: ${{ always() }}

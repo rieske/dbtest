@@ -3,7 +3,7 @@ pull_request_rules:
     conditions:
       - author=renovate[bot]
       - base=main
-      - check-success=build
+      - check-success=build / Build Outcome
     actions:
       merge:
         method: merge

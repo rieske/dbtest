@@ -15,7 +15,7 @@ testing {
     suites {
         test {
             dependencies {
-                implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.22.1")
+                implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.23.1")
                 implementation("org.flywaydb:flyway-mysql:9.22.3")
                 implementation(project.dependencies.testFixtures(project(":base")))
             }

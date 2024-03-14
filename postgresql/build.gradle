@@ -7,7 +7,7 @@ description = "Fast tests against containerized PostgreSQL database."
 dependencies {
     api(project(":base"))
 
-    implementation("org.postgresql:postgresql:42.7.2")
+    implementation("org.postgresql:postgresql:42.7.3")
     implementation("org.testcontainers:postgresql:1.19.7")
 }
 

@@ -12,7 +12,7 @@ jobs:
           java-version: 11
           distribution: temurin
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
       - name: Build
         run: ./gradlew build
 
@@ -31,7 +31,7 @@ jobs:
           java-version: 11
           distribution: temurin
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
       - name: Test PostgreSQL versions
         run: ./gradlew :postgresql:test
         env:
@@ -52,7 +52,7 @@ jobs:
           java-version: 11
           distribution: temurin
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
       - name: Test MySQL versions
         run: ./gradlew :mysql:test
         env:
@@ -70,7 +70,7 @@ jobs:
           java-version: 11
           distribution: temurin
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
       - name: Test H2 support
         run: ./gradlew :h2:test
 

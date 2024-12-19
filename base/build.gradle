@@ -11,7 +11,7 @@ dependencies {
 
     testFixturesApi("org.assertj:assertj-core:3.26.3")
     testFixturesImplementation("org.flywaydb:flyway-core:9.22.3")
-    testFixturesImplementation("ch.qos.logback:logback-classic:1.5.13")
+    testFixturesImplementation("ch.qos.logback:logback-classic:1.5.14")
 }
 
 components.java.withVariantsFromConfiguration(configurations.testFixturesApiElements) { skip() }

@@ -9,7 +9,7 @@ dependencies {
     api("org.junit.jupiter:junit-jupiter-api:5.13.4")
     implementation("org.slf4j:slf4j-api:2.0.17")
 
-    testFixturesApi("org.assertj:assertj-core:3.27.4")
+    testFixturesApi("org.assertj:assertj-core:3.27.5")
     testFixturesImplementation("org.flywaydb:flyway-core:9.22.3")
     testFixturesImplementation("ch.qos.logback:logback-classic:1.5.18")
 }

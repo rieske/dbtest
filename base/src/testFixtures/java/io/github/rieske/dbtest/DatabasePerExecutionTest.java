@@ -15,6 +15,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+// Slow/Fast suites share DATABASE_PER_EXECUTION state and a static counter; keep them
+// single-threaded so parallel JUnit does not race the shared record count.
+@Execution(ExecutionMode.SAME_THREAD)
 public abstract class DatabasePerExecutionTest {
     private final DatabaseTestExtension slowExtension;
     private final DatabaseTestExtension fastExtension;

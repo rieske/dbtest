@@ -42,8 +42,13 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
     private final DatabaseState databaseState;
     private final BiConsumer<DatabaseEngine, String> databaseCreator;
 
-    private Class<?> testClass;
-    private String databaseName;
+    /**
+     * Per-thread extension state. A single extension instance is often shared across nested
+     * classes and can be invoked concurrently under JUnit parallel execution; plain instance
+     * fields for {@code testClass}/{@code databaseName} race and leak databases across tests.
+     */
+    private final ThreadLocal<Class<?>> currentTestClass = new ThreadLocal<>();
+    private final ThreadLocal<String> currentDatabaseName = new ThreadLocal<>();
 
     DatabaseTestExtension(TestDatabase database, Mode dataRetentionMode, boolean migrateOnce) {
         this.databaseState = database.getState(dataRetentionMode);
@@ -56,18 +61,23 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
             ReflectiveInvocationContext<Constructor<T>> invocationContext,
             ExtensionContext extensionContext
     ) throws Throwable {
-        this.testClass = extensionContext.getRequiredTestClass();
+        currentTestClass.set(extensionContext.getRequiredTestClass());
         return invocation.proceed();
     }
 
     @Override
     public void beforeEach(ExtensionContext context) {
-        this.testClass = context.getRequiredTestClass();
+        currentTestClass.set(context.getRequiredTestClass());
     }
 
     @Override
     public void afterEach(ExtensionContext context) {
-        databaseState.afterTestMethod(databaseName);
+        try {
+            databaseState.afterTestMethod(currentDatabaseName.get());
+        } finally {
+            currentDatabaseName.remove();
+            currentTestClass.remove();
+        }
     }
 
     /**
@@ -77,7 +87,12 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
      * @return dataSource for a migrated database
      */
     public DataSource getDataSource() {
-        this.databaseName = databaseState.ensureDatabaseCreated(databaseName, testClass, databaseCreator);
+        String databaseName = databaseState.ensureDatabaseCreated(
+                currentDatabaseName.get(),
+                currentTestClass.get(),
+                databaseCreator
+        );
+        currentDatabaseName.set(databaseName);
         return databaseState.dataSourceForDatabase(databaseName);
     }
 

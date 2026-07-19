@@ -38,16 +38,17 @@ class H2TestDatabase extends DatabaseEngine {
 
     @Override
     DataSource dataSourceForDatabase(String databaseName) {
-        if (!databases.containsKey(databaseName)) {
+        return databases.computeIfAbsent(databaseName, name -> {
             JdbcDataSource dataSource = new JdbcDataSource();
-            dataSource.setUrl("jdbc:h2:mem:" + databaseName + ";DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=1;MODE=" + h2Mode.connectionStringValue);
+            // Keeper connection holds the in-memory DB open; dropDatabase closes it and removes
+            // the entry so the mem DB is discarded (DB_CLOSE_DELAY=0).
+            dataSource.setUrl("jdbc:h2:mem:" + name + ";DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=0;MODE=" + h2Mode.connectionStringValue);
             try {
-                databases.put(databaseName, new Database(dataSource, dataSource.getConnection()));
+                return new Database(dataSource, dataSource.getConnection());
             } catch (SQLException e) {
                 throw new RuntimeException("Could not acquire a connection", e);
             }
-        }
-        return databases.get(databaseName).dataSource;
+        }).dataSource;
     }
 
     @Override
@@ -72,7 +73,7 @@ class H2TestDatabase extends DatabaseEngine {
 
     @Override
     void dropDatabase(String databaseName) {
-        Database database = databases.get(databaseName);
+        Database database = databases.remove(databaseName);
         if (database != null) {
             try {
                 database.connection.close();

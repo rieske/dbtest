@@ -6,7 +6,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
+// Ordered createState/ensureState pairs share a DATABASE_PER_TEST_CLASS database.
+// Parallel method execution would race those ordering assumptions.
+@Execution(ExecutionMode.SAME_THREAD)
 public abstract class DatabasePerTestClassTest {
     private final DatabaseTestExtension slowExtension;
     private final DatabaseTestExtension fastExtension;
@@ -17,6 +22,7 @@ public abstract class DatabasePerTestClassTest {
     }
 
     @Nested
+    @Execution(ExecutionMode.SAME_THREAD)
     class SlowTest extends DatabaseTest {
         SlowTest() {
             super(slowExtension);
@@ -60,6 +66,7 @@ public abstract class DatabasePerTestClassTest {
     }
 
     @Nested
+    @Execution(ExecutionMode.SAME_THREAD)
     class FastTest extends DatabaseTest {
         FastTest() {
             super(fastExtension);

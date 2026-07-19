@@ -11,14 +11,19 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-// Slow/Fast suites share DATABASE_PER_EXECUTION state and a static counter; keep them
-// single-threaded so parallel JUnit does not race the shared record count.
+// Each extension instance has its own DATABASE_PER_EXECUTION database. Track expected
+// record counts per extension so parallel top-level suites (and Slow vs Fast) do not
+// race a shared static counter. Keep each suite single-threaded for ordered nested tests.
 @Execution(ExecutionMode.SAME_THREAD)
 public abstract class DatabasePerExecutionTest {
+    private static final ConcurrentHashMap<DatabaseTestExtension, AtomicInteger> RECORD_COUNTS =
+            new ConcurrentHashMap<>();
+
     private final DatabaseTestExtension slowExtension;
     private final DatabaseTestExtension fastExtension;
 
@@ -44,10 +49,12 @@ public abstract class DatabasePerExecutionTest {
     @Execution(ExecutionMode.SAME_THREAD)
     @TestClassOrder(ClassOrderer.OrderAnnotation.class)
     private abstract static class TestTemplate extends DatabaseTest {
-        private static final AtomicInteger currentRecordCount = new AtomicInteger(0);
-
         TestTemplate(DatabaseTestExtension database) {
             super(database);
+        }
+
+        private AtomicInteger currentRecordCount() {
+            return RECORD_COUNTS.computeIfAbsent(database, ignored -> new AtomicInteger(0));
         }
 
         @Order(0)
@@ -58,6 +65,7 @@ public abstract class DatabasePerExecutionTest {
             @Order(1)
             @Test
             void createState() {
+                AtomicInteger currentRecordCount = currentRecordCount();
                 currentRecordCount.set(getRecordCount());
                 insertRandomRecord();
                 int expectedRecordCount = currentRecordCount.incrementAndGet();
@@ -70,7 +78,7 @@ public abstract class DatabasePerExecutionTest {
             void ensureState() {
                 int recordCount = getRecordCount();
                 assertThat(recordCount).isGreaterThan(0);
-                assertThat(recordCount).isGreaterThanOrEqualTo(currentRecordCount.get());
+                assertThat(recordCount).isGreaterThanOrEqualTo(currentRecordCount().get());
             }
         }
 
@@ -81,6 +89,7 @@ public abstract class DatabasePerExecutionTest {
             @Order(4)
             @Test
             void createState() {
+                AtomicInteger currentRecordCount = currentRecordCount();
                 int recordCount = getRecordCount();
                 assertThat(recordCount).isGreaterThan(0);
                 assertThat(recordCount).isGreaterThanOrEqualTo(currentRecordCount.get());
@@ -95,7 +104,7 @@ public abstract class DatabasePerExecutionTest {
             void ensureState() {
                 int recordCount = getRecordCount();
                 assertThat(recordCount).isGreaterThan(1);
-                assertThat(recordCount).isGreaterThanOrEqualTo(currentRecordCount.get());
+                assertThat(recordCount).isGreaterThanOrEqualTo(currentRecordCount().get());
             }
         }
     }

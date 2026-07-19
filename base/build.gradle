@@ -11,6 +11,7 @@ dependencies {
 
     testFixturesApi("org.assertj:assertj-core:3.27.7")
     testFixturesImplementation("org.flywaydb:flyway-core:12.11.0")
+    testFixturesImplementation("org.flywaydb:flyway-database-postgresql:12.11.0")
     testFixturesImplementation("ch.qos.logback:logback-classic:1.5.38")
 }
 

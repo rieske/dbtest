@@ -109,17 +109,17 @@ public abstract class DatabaseTestExtension implements Extension, BeforeEachCall
             return (database, databaseName) -> {
                 database.ensureTemplateDatabaseMigrated(migrator);
                 long startTime = System.currentTimeMillis();
-                log.info("Copying migrated template database to {}", databaseName);
+                log.debug("Copying migrated template database to {}", databaseName);
                 database.cloneTemplateDatabaseTo(databaseName);
-                log.info("Copied migrated template database to {} in {}", databaseName, TimeUtils.durationSince(startTime));
+                log.debug("Copied migrated template database to {} in {}", databaseName, TimeUtils.durationSince(startTime));
             };
         } else {
             return (database, databaseName) -> {
                 database.createDatabase(databaseName);
                 long startTime = System.currentTimeMillis();
-                log.info("Migrating database {}", databaseName);
+                log.debug("Migrating database {}", databaseName);
                 migrator.accept(database.dataSourceForDatabase(databaseName));
-                log.info("Migrated database {} in {}", databaseName, TimeUtils.durationSince(startTime));
+                log.debug("Migrated database {} in {}", databaseName, TimeUtils.durationSince(startTime));
             };
         }
     }

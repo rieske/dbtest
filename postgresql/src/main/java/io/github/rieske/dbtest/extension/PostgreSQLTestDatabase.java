@@ -13,6 +13,7 @@ class PostgreSQLTestDatabase extends DatabaseEngine {
     private static final Logger log = LoggerFactory.getLogger(PostgreSQLTestDatabase.class);
     private final PostgreSQLContainer<?> container;
     private final String jdbcPrefix;
+    private final boolean supportsFileCopyStrategy;
 
     @SuppressWarnings("resource")
     PostgreSQLTestDatabase(String version) {
@@ -29,11 +30,18 @@ class PostgreSQLTestDatabase extends DatabaseEngine {
         this.container.start();
         log.info("Started {} container in {}", dockerImageName, TimeUtils.durationSince(startTime));
         this.jdbcPrefix = "jdbc:postgresql://" + container.getHost() + ":" + container.getMappedPort(5432) + "/";
+        // CREATE DATABASE ... STRATEGY was introduced in PostgreSQL 15
+        this.supportsFileCopyStrategy = majorVersion(version) >= 15;
     }
 
     @Override
     void cloneTemplateDatabaseTo(String targetDatabaseName) {
-        executePrivileged("CREATE DATABASE " + targetDatabaseName + " TEMPLATE " + getTemplateDatabaseName());
+        String sql = "CREATE DATABASE " + targetDatabaseName + " TEMPLATE " + getTemplateDatabaseName();
+        if (supportsFileCopyStrategy) {
+            // file_copy is typically faster than the default wal_log strategy for template clones on tmpfs
+            sql += " STRATEGY file_copy";
+        }
+        executePrivileged(sql);
     }
 
     @Override
@@ -58,5 +66,14 @@ class PostgreSQLTestDatabase extends DatabaseEngine {
     @Override
     DataSource getPrivilegedDataSource() {
         return dataSourceForDatabase("postgres");
+    }
+
+    private static int majorVersion(String version) {
+        try {
+            String major = version.split("[.^]")[0];
+            return Integer.parseInt(major);
+        } catch (RuntimeException e) {
+            return 0;
+        }
     }
 }

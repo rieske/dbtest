@@ -4,6 +4,8 @@ import javax.sql.DataSource;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
 
 abstract class DatabaseState {
@@ -25,6 +27,19 @@ abstract class DatabaseState {
     }
 
     static class PerMethod extends DatabaseState {
+        /**
+         * Dropping databases is relatively expensive and does not need to block the test thread.
+         * Unique database names mean lazy cleanup is safe; container teardown reclaims leftovers.
+         */
+        private static final ExecutorService DROP_EXECUTOR = Executors.newFixedThreadPool(
+                Math.max(2, Runtime.getRuntime().availableProcessors() / 2),
+                r -> {
+                    Thread t = new Thread(r, "dbtest-drop");
+                    t.setDaemon(true);
+                    return t;
+                }
+        );
+
         PerMethod(DatabaseEngine database) {
             super(database);
         }
@@ -42,7 +57,14 @@ abstract class DatabaseState {
         @Override
         void afterTestMethod(String databaseName) {
             if (databaseName != null) {
-                database.dropDatabase(databaseName);
+                String name = databaseName;
+                DROP_EXECUTOR.execute(() -> {
+                    try {
+                        database.dropDatabase(name);
+                    } catch (RuntimeException e) {
+                        // Best-effort cleanup; container shutdown reclaims any leftovers.
+                    }
+                });
             }
         }
     }
